@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 技能養成三部曲 | 從觀念到變現</title>
+    
+    <!-- CSS Framework: Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Icons: FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Charts: Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind Config for Custom Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        c1: { dark: '#44433F', light: '#f9f6f3', accent: '#d6a475' },
+                        c2: { dark: '#0c4a6e', light: '#f0f9ff', accent: '#38bdf8' },
+                        c3: { dark: '#0f172a', light: '#f0fdf4', accent: '#a3e635' },
+                        neutral: { bg: '#f1f5f9' }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Chart Container Guidelines (Strict Adherence) */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* max-w-xl equivalent */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .nav-active { border-bottom: 3px solid currentColor; font-weight: 700; }
+    </style>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-neutral-bg text-slate-700 font-sans antialiased selection:bg-c1-accent selection:text-white">
+
+    <!-- Chosen Palette: 
+         - Base: Warm Neutral (#f1f5f9)
+         - C1 (Foundation): Dark Grey/Gold (#44433F / #d6a475)
+         - C2 (Exam): Calm Blue (#0c4a6e / #38bdf8)
+         - C3 (App): Navy/Neon Green (#0f172a / #a3e635) 
+    -->
+
+    <!-- Application Structure Plan:
+         1. Persistent Navigation (Top): Quick jumps between stages.
+         2. Dynamic Main View: Single container that swaps content (Dashboard -> C1 -> C2 -> C3) based on state.
+         3. Dashboard: A "Roadmap" visualizer.
+         4. Course Views: 
+            - Hero Section (Context)
+            - Interactive Viz (Data Story)
+            - Syllabus/Pain Points (Content)
+            - CTA (Action)
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. C1 Radar Chart: Visualizes the transformation from "Confusion" to "Logic" (Goal: Inform/Compare).
+         2. C2 Donut Chart: Shows Exam Success = 50% Knowledge + 50% Process (Goal: Relieve Anxiety).
+         3. C3 Bar Chart (Interactive): ROI Calculator. Toggling "I took C1+C2" reduces the C3 cost bar, visually proving the "Earn Back" value (Goal: Change/Persuade).
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used (using FontAwesome <i> tags). NO Mermaid JS used. -->
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center cursor-pointer" onclick="app.router('dashboard')">
+                    <span class="text-xl font-bold tracking-tight text-slate-800">AI 技能養成<span class="text-c1-accent">三部曲</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <button onclick="app.router('dashboard')" id="nav-dashboard" class="text-slate-500 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">總覽</button>
+                    <button onclick="app.router('c1')" id="nav-c1" class="text-c1-dark hover:text-c1-accent px-3 py-2 text-sm font-medium transition-colors">I. 觀念精講</button>
+                    <button onclick="app.router('c2')" id="nav-c2" class="text-c2-dark hover:text-c2-accent px-3 py-2 text-sm font-medium transition-colors">II. 證照陪考</button>
+                    <button onclick="app.router('c3')" id="nav-c3" class="text-c3-dark hover:text-c3-accent px-3 py-2 text-sm font-medium transition-colors">III. 應用實戰</button>
+                </div>
+                <!-- Mobile Menu Button (simplified for demo) -->
+                <div class="flex items-center md:hidden">
+                    <button onclick="app.toggleMobileMenu()" class="text-slate-600"><i class="fa-solid fa-bars text-xl"></i></button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
+            <button onclick="app.router('dashboard')" class="block w-full text-left px-4 py-3 text-slate-600 border-b">總覽</button>
+            <button onclick="app.router('c1')" class="block w-full text-left px-4 py-3 text-c1-dark border-b">I. 觀念精講</button>
+            <button onclick="app.router('c2')" class="block w-full text-left px-4 py-3 text-c2-dark border-b">II. 證照陪考</button>
+            <button onclick="app.router('c3')" class="block w-full text-left px-4 py-3 text-c3-dark">III. 應用實戰</button>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main id="app-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
+        <!-- Content injected by JS -->
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const app = {
+            state: {
+                currentView: 'dashboard',
+                c3Calculator: {
+                    tookC1: false,
+                    tookC2: false
+                }
+            },
+
+            // --- DATA STORE ---
+            content: {
+                dashboard: {
+                    title: "從觀念、取證到應用的完整路徑",
+                    subtitle: "這不是零散的課程，而是一套為知識工作者設計的系統化 AI 技能升級方案。",
+                    cards: [
+                        {
+                            id: 'c1',
+                            stage: "階段 I",
+                            title: "觀念精講",
+                            desc: "建立 AI 認知框架與 Google 證照標準。",
+                            icon: "fa-brain",
+                            color: "text-c1-accent",
+                            border: "border-c1-accent",
+                            bg: "hover:bg-c1-light",
+                            btnText: "建立基礎"
+                        },
+                        {
+                            id: 'c2',
+                            stage: "階段 II",
+                            title: "證照陪考",
+                            desc: "正式考場實戰，兩小時內取得證書。",
+                            icon: "fa-certificate",
+                            color: "text-c2-accent",
+                            border: "border-c2-accent",
+                            bg: "hover:bg-c2-light",
+                            btnText: "實戰通關"
+                        },
+                        {
+                            id: 'c3',
+                            stage: "階段 III",
+                            title: "應用實戰",
+                            desc: "打造工作流，學費折抵讓投資回本。",
+                            icon: "fa-rocket",
+                            color: "text-c3-accent",
+                            border: "border-c3-accent",
+                            bg: "hover:bg-c3-light",
+                            btnText: "變現應用"
+                        }
+                    ]
+                },
+                c1: {
+                    theme: 'c1',
+                    title: "AI 觀念精講：以 Google 證照標準建立穩固基礎",
+                    tagline: "兩小時，建立你的 AI 思維底層，從模糊到清楚。",
+                    intro: "本課程專為非工程師設計。我們拆解模型機制、剖析考點邏輯，讓你不再盲目跟風，而是掌握主動權。這是你進入 AI 世界的門票，也是參加下一階段「陪考營」的唯一資格。",
+                    painPoints: [
+                        { title: "觀念零散", desc: "不再碎片化學習，以 Google 證照結構為標準。" },
+                        { title: "盲目提問", desc: "理解模型推論機制，學會「如何精準提問」。" },
+                        { title: "無法判斷", desc: "辨識風險、偏誤與幻覺，建立使用基準線。" }
+                    ],
+                    price: "NT$ 700",
+                    bundlePrice: "NT$ 1,000 (含陪考營)",
+                    cta: "立即報名"
+                },
+                c2: {
+                    theme: 'c2',
+                    title: "AI 證照陪考營：考題拆解與模擬通關",
+                    tagline: "我們不是來模擬，而是來完成的。",
+                    intro: "這是「正式考場實戰」。在兩小時內，我們將在現場登入系統、開書查資料、完成考試並取得證書。本課程強制依附於第一階段，確保所有人都具備相同觀念基礎，專注於流程與通關。",
+                    steps: ["登入系統", "考前避雷", "查找技巧", "正式作答", "取得證書"],
+                    warning: "⚠️ 僅限已完成《AI 觀念精講》者報名",
+                    price: "不開放單獨報名",
+                    bundlePrice: "NT$ 1,000 (合報價)",
+                    cta: "報名合報方案"
+                },
+                c3: {
+                    theme: 'c3',
+                    title: "AI 應用實戰：把證照觀念變成工作流程",
+                    tagline: "從概念到真正能用，把學費賺回來。",
+                    intro: "跳過基礎，直奔應用。這是一堂 4–6 小時的實作工作坊，教你將證照觀念轉化為高效率的工作 Prompt 與流程。最重要的是，我們提供「學費折抵」機制，讓你之前的學習投資直接變現。",
+                    modules: [
+                        { title: "文件管理", desc: "高效提取核心論點，知識結構化。" },
+                        { title: "內容生成", desc: "建立報告與文案的 Prompt Template 流程。" },
+                        { title: "流程自動", desc: "AI 協作樞紐，無縫銜接現有軟體。" }
+                    ],
+                    price: "定價待定",
+                    cta: "預約折抵名額"
+                }
+            },
+
+            // --- RENDER FUNCTIONS ---
+
+            init: function() {
+                this.router('dashboard');
+                // Mobile menu logic
+                window.onclick = function(event) {
+                    if (!event.target.closest('#mobile-menu') && !event.target.closest('.fa-bars')) {
+                        document.getElementById('mobile-menu').classList.add('hidden');
+                    }
+                }
+            },
+
+            toggleMobileMenu: function() {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            },
+
+            router: function(viewId) {
+                this.state.currentView = viewId;
+                const container = document.getElementById('app-container');
+                
+                // Update Nav UI
+                document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('nav-active'));
+                const navBtn = document.getElementById('nav-' + viewId);
+                if (navBtn) navBtn.classList.add('nav-active');
+
+                // Render Content
+                if (viewId === 'dashboard') {
+                    this.renderDashboard(container);
+                } else if (viewId === 'c1') {
+                    this.renderC1(container);
+                } else if (viewId === 'c2') {
+                    this.renderC2(container);
+                } else if (viewId === 'c3') {
+                    this.renderC3(container);
+                }
+
+                // Scroll to top
+                window.scrollTo(0, 0);
+            },
+
+            // --- VIEW: DASHBOARD ---
+            renderDashboard: function(container) {
+                const data = this.content.dashboard;
+                let html = `
+                    <section class="text-center py-12 fade-in">
+                        <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-6">${data.title}</h1>
+                        <p class="text-xl text-slate-600 max-w-3xl mx-auto mb-16">${data.subtitle}</p>
+                        
+                        <!-- Cards Grid -->
+                        <div class="grid md:grid-cols-3 gap-8">
+                            ${data.cards.map((card, index) => `
+                                <div onclick="app.router('${card.id}')" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border-t-4 ${card.border} cursor-pointer transform hover:-translate-y-2 relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        <i class="fa-solid ${card.icon} text-8xl ${card.color}"></i>
+                                    </div>
+                                    <div class="relative z-10">
+                                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-wider mb-4 bg-slate-100 text-slate-600">${card.stage}</span>
+                                        <h2 class="text-2xl font-bold mb-3 text-slate-800 group-hover:${card.color} transition-colors">${card.title}</h2>
+                                        <p class="text-slate-600 mb-8 leading-relaxed">${card.desc}</p>
+                                        <span class="inline-flex items-center font-bold text-sm ${card.color}">
+                                            ${card.btnText} <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </section>
+                    
+                    <!-- Bundle Promo Section -->
+                    <section class="mt-16 bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-8 fade-in">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-slate-800 mb-4">🔥 推薦路徑：合報方案</h3>
+                            <p class="text-slate-600 mb-6">一次搞定「觀念」與「證照」。先建立地基，再到考場實戰。合報不僅省錢，更為第三階段的應用課累積高額折抵金。</p>
+                            <div class="flex items-center gap-4">
+                                <span class="text-3xl font-bold text-c1-accent">NT$ 1,000</span>
+                                <span class="text-slate-400 line-through text-lg">NT$ 1,400</span>
+                                <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold">省下 NT$ 400</span>
+                            </div>
+                        </div>
+                        <div class="flex-none">
+                            <button onclick="app.router('c1')" class="bg-slate-800 text-white px-8 py-4 rounded-xl font-bold hover:bg-slate-700 transition-colors shadow-lg hover:shadow-slate-300/50">
+                                查看詳細方案
+                            </button>
+                        </div>
+                    </section>
+                `;
+                container.innerHTML = html;
+            },
+
+            // --- VIEW: COURSE 1 (FOUNDATION) ---
+            renderC1: function(container) {
+                const data = this.content.c1;
+                container.innerHTML = `
+                    <div class="grid lg:grid-cols-2 gap-12 fade-in items-start">
+                        <!-- Left: Content -->
+                        <div>
+                            <span class="text-c1-accent font-bold tracking-widest uppercase text-sm mb-2 block">Stage I : Foundation</span>
+                            <h1 class="text-3xl md:text-4xl font-bold text-c1-dark mb-6">${data.title}</h1>
+                            <p class="text-xl font-medium text-slate-600 mb-6 border-l-4 border-c1-accent pl-4">${data.tagline}</p>
+                            <p class="text-slate-600 leading-relaxed mb-8">${data.intro}</p>
+                            
+                            <!-- Pain Points List -->
+                            <div class="space-y-6 mb-10">
+                                ${data.painPoints.map(p => `
+                                    <div class="flex gap-4">
+                                        <div class="flex-none pt-1">
+                                            <i class="fa-solid fa-check text-c1-accent"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-800">${p.title}</h4>
+                                            <p class="text-sm text-slate-500">${p.desc}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Pricing Box -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-slate-500">單堂費用</span>
+                                    <span class="font-bold text-xl text-slate-700">${data.price}</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-6 bg-orange-50 p-3 rounded-lg border border-orange-100">
+                                    <span class="text-orange-800 font-bold"><i class="fa-solid fa-star mr-2"></i>推薦合報</span>
+                                    <span class="font-bold text-xl text-orange-600">${data.bundlePrice}</span>
+                                </div>
+                                <button class="w-full bg-c1-dark text-white py-3 rounded-lg font-bold hover:bg-slate-700 transition-colors">
+                                    ${data.cta}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: Visual -->
+                        <div class="space-y-8">
+                            <!-- Chart Container -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <h3 class="text-lg font-bold text-center mb-4 text-slate-700">能力轉化雷達圖</h3>
+                                <div class="chart-container">
+                                    <canvas id="chartC1"></canvas>
+                                </div>
+                                <p class="text-center text-xs text-slate-400 mt-4">課程前後的能力維度對比</p>
+                            </div>
+
+                            <!-- Outcome Box -->
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                                <h3 class="font-bold text-c1-dark mb-3">🎓 結業成果</h3>
+                                <ul class="space-y-2 text-sm text-slate-600">
+                                    <li>• <span class="font-semibold">概念講義：</span> 可用於 Open Book 考試</li>
+                                    <li>• <span class="font-semibold">思維地圖：</span> 建立可延伸的知識樹</li>
+                                    <li>• <span class="font-semibold">通關門票：</span> 取得階段 II 陪考營資格</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Render Chart
+                setTimeout(() => {
+                    const ctx = document.getElementById('chartC1').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['模型理解', '風險辨識', '提問邏輯', '考試信心', '應用直覺'],
+                            datasets: [{
+                                label: '課前',
+                                data: [20, 30, 20, 10, 15],
+                                fill: true,
+                                backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                                borderColor: 'rgb(148, 163, 184)',
+                                pointBackgroundColor: 'rgb(148, 163, 184)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(148, 163, 184)'
+                            }, {
+                                label: '課後',
+                                data: [85, 90, 85, 95, 80],
+                                fill: true,
+                                backgroundColor: 'rgba(214, 164, 117, 0.2)',
+                                borderColor: 'rgb(214, 164, 117)', // Gold accent
+                                pointBackgroundColor: 'rgb(214, 164, 117)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(214, 164, 117)'
+                            }]
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            elements: { line: { borderWidth: 3 } },
+                            scales: { r: { suggestMin: 0, suggestMax: 100 } },
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+                }, 100);
+            },
+
+            // --- VIEW: COURSE 2 (EXAM) ---
+            renderC2: function(container) {
+                const data = this.content.c2;
+                container.innerHTML = `
+                    <div class="grid lg:grid-cols-2 gap-12 fade-in items-start">
+                        <!-- Left: Visual & Process -->
+                        <div class="order-2 lg:order-1 space-y-8">
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <h3 class="text-lg font-bold text-center mb-4 text-c2-dark">考試通過率組成分析</h3>
+                                <div class="chart-container">
+                                    <canvas id="chartC2"></canvas>
+                                </div>
+                                <p class="text-center text-sm text-slate-500 mt-4 px-4">許多人失敗不是因為不懂 (觀念 50%)，而是敗給了系統操作與考場焦慮 (流程 50%)。</p>
+                            </div>
+
+                            <div class="bg-c2-light/30 p-6 rounded-2xl border border-c2-accent/30">
+                                <h3 class="font-bold text-c2-dark mb-4 text-center">現場實戰流程</h3>
+                                <div class="flex justify-between items-center text-xs md:text-sm text-center relative">
+                                    <!-- Connecting Line -->
+                                    <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -z-10 transform -translate-y-1/2"></div>
+                                    
+                                    ${data.steps.map((step, idx) => `
+                                        <div class="bg-white px-2 py-1 rounded shadow-sm border border-slate-200 z-10">
+                                            <div class="w-6 h-6 bg-c2-accent text-white rounded-full flex items-center justify-center mx-auto mb-1 text-xs font-bold">${idx + 1}</div>
+                                            ${step}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Content -->
+                        <div class="order-1 lg:order-2">
+                            <span class="text-c2-accent font-bold tracking-widest uppercase text-sm mb-2 block">Stage II : Certification</span>
+                            <h1 class="text-3xl md:text-4xl font-bold text-c2-dark mb-6">${data.title}</h1>
+                            <p class="text-xl font-medium text-slate-600 mb-6 border-l-4 border-c2-accent pl-4">${data.tagline}</p>
+                            <p class="text-slate-600 leading-relaxed mb-8">${data.intro}</p>
+
+                            <!-- Restriction Box -->
+                            <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-amber-700 font-bold">
+                                            ${data.warning}
+                                        </p>
+                                        <p class="text-xs text-amber-600 mt-1">
+                                            本營隊不接受單獨報名。我們需要你已經具備共同的觀念語言，才能達成 100% 的實戰效率。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pricing -->
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <div class="flex justify-between items-center mb-6 pb-6 border-b border-slate-100">
+                                    <div>
+                                        <span class="block text-slate-500 text-sm">觀念精講 + 陪考營</span>
+                                        <span class="block font-bold text-2xl text-c2-dark">${data.bundlePrice}</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="block text-slate-400 line-through text-sm">原價 NT$ 1,400</span>
+                                        <span class="block text-green-600 font-bold text-sm">省下 NT$ 400</span>
+                                    </div>
+                                </div>
+                                <button class="w-full bg-c2-dark text-white py-3 rounded-lg font-bold hover:bg-slate-700 transition-colors shadow-lg hover:shadow-c2-accent/30">
+                                    ${data.cta}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Render Chart
+                setTimeout(() => {
+                    const ctx = document.getElementById('chartC2').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['觀念基礎 (階段 I)', '流程與抗壓 (階段 II)'],
+                            datasets: [{
+                                data: [50, 50],
+                                backgroundColor: ['#e2e8f0', '#38bdf8'], // Slate-200, Sky-400
+                                borderWidth: 0,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.label + ': ' + context.raw + '% 重要性';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }, 100);
+            },
+
+            // --- VIEW: COURSE 3 (APPLICATION) ---
+            renderC3: function(container) {
+                const data = this.content.c3;
+                container.innerHTML = `
+                    <div class="fade-in">
+                        <!-- Hero Section -->
+                        <div class="text-center mb-12">
+                            <span class="bg-c3-accent text-c3-dark px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 inline-block">Stage III : Application</span>
+                            <h1 class="text-3xl md:text-5xl font-bold text-c3-dark mb-4">${data.title}</h1>
+                            <p class="text-xl text-slate-600 max-w-2xl mx-auto">${data.tagline}</p>
+                        </div>
+
+                        <!-- Modules Grid -->
+                        <div class="grid md:grid-cols-3 gap-6 mb-16">
+                            ${data.modules.map((m, i) => `
+                                <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-c3-dark">
+                                    <div class="text-4xl text-slate-200 font-bold mb-2">0${i+1}</div>
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">${m.title}</h4>
+                                    <p class="text-sm text-slate-600">${m.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Interactive ROI Section -->
+                        <div class="bg-c3-dark text-white rounded-3xl p-8 md:p-12 shadow-2xl overflow-hidden relative">
+                            <!-- Background decoration -->
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-c3-accent opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+                            
+                            <div class="grid lg:grid-cols-2 gap-12 relative z-10">
+                                <div>
+                                    <h3 class="text-2xl font-bold mb-6 text-c3-accent"><i class="fa-solid fa-calculator mr-2"></i>學費折抵試算</h3>
+                                    <p class="text-slate-300 mb-8">凡參加過前兩階段的學員，學費可全額折抵本課程。這意味著你的知識投資會「回本」。</p>
+                                    
+                                    <!-- Controls -->
+                                    <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700 space-y-4">
+                                        <p class="font-bold text-sm text-slate-400 uppercase tracking-wider mb-2">勾選你已參加的課程：</p>
+                                        <label class="flex items-center space-x-3 cursor-pointer group">
+                                            <input type="checkbox" id="checkC1" onchange="app.updateROI()" class="w-5 h-5 text-c3-accent rounded bg-slate-700 border-slate-500 focus:ring-c3-accent">
+                                            <span class="group-hover:text-white transition-colors">階段 I：觀念精講 (NT$ 700)</span>
+                                        </label>
+                                        <label class="flex items-center space-x-3 cursor-pointer group">
+                                            <input type="checkbox" id="checkC2" onchange="app.updateROI()" class="w-5 h-5 text-c3-accent rounded bg-slate-700 border-slate-500 focus:ring-c3-accent">
+                                            <span class="group-hover:text-white transition-colors">階段 II：證照陪考 (NT$ 300+)</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="mt-8">
+                                        <button class="bg-c3-accent text-c3-dark w-full py-4 rounded-xl font-bold text-lg hover:bg-lime-400 transition-colors shadow-[0_0_20px_rgba(163,230,53,0.3)]">
+                                            ${data.cta}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-center font-bold mb-4 text-slate-300">課程實際成本變化</h4>
+                                    <div class="chart-container" style="height: 300px;">
+                                        <canvas id="chartROI"></canvas>
+                                    </div>
+                                    <p id="roi-feedback" class="text-center mt-4 text-c3-accent font-bold h-6"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Render Chart (Initial State)
+                setTimeout(() => {
+                    this.initROIChart();
+                }, 100);
+            },
+
+            // --- ROI LOGIC ---
+            roiChartInstance: null,
+            baseCost: 2500, // Hypothetical Course 3 cost
+
+            initROIChart: function() {
+                const ctx = document.getElementById('chartROI').getContext('2d');
+                this.roiChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['原始費用', '折抵後費用'],
+                        datasets: [{
+                            label: '金額 (NT$)',
+                            data: [this.baseCost, this.baseCost],
+                            backgroundColor: ['rgba(148, 163, 184, 0.5)', '#a3e635'],
+                            borderRadius: 8,
+                            barThickness: 50
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'NT$ ' + context.raw;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                ticks: { color: '#fff', font: { weight: 'bold' } },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+                this.updateROI();
+            },
+
+            updateROI: function() {
+                if (!this.roiChartInstance) return;
+
+                const c1Checked = document.getElementById('checkC1').checked;
+                const c2Checked = document.getElementById('checkC2').checked;
+                
+                let rebate = 0;
+                if (c1Checked) rebate += 700;
+                if (c2Checked) rebate += 300; // Assuming bundle diff or C2 cost part
+
+                // Logic: If user took both, they paid 1000 total. Max rebate logic could be 1000.
+                if (c1Checked && c2Checked) rebate = 1000; 
+
+                const finalCost = Math.max(0, this.baseCost - rebate);
+
+                // Update Chart
+                this.roiChartInstance.data.datasets[0].data[1] = finalCost;
+                this.roiChartInstance.update();
+
+                // Update Feedback Text
+                const feedback = document.getElementById('roi-feedback');
+                if (rebate > 0) {
+                    feedback.innerHTML = `🎉 您已省下 NT$ ${rebate}，投資直接變現！`;
+                    feedback.classList.add('animate-pulse');
+                } else {
+                    feedback.innerHTML = '勾選左側課程查看折抵優惠';
+                    feedback.classList.remove('animate-pulse');
+                }
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
