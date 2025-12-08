@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拍賣台大螢幕</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060b12;
+      --accent: #00c2ff;
+      --accent-2: #ff6f61;
+      --text: #f3f6ff;
+      --muted: #b4c3d6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: radial-gradient(circle at 30% 20%, rgba(0,194,255,0.16), transparent 32%), radial-gradient(circle at 70% 70%, rgba(255,111,97,0.12), transparent 30%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stage {
+      width: min(1600px, 100%);
+      height: min(900px, 90vh);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      box-shadow: 0 16px 46px rgba(0,0,0,0.4);
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h1 { margin: 0; font-size: clamp(28px, 2vw, 36px); }
+    .kbd {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(0,0,0,0.35);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .kbd span {
+      display: inline-block;
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .hero {
+      position: relative;
+      background: #0b1624;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+      display: flex;
+      align-items: flex-end;
+      padding: 18px;
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 700;
+    }
+    .panel {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      font-size: clamp(18px, 1.8vw, 22px);
+    }
+    .label {
+      color: var(--muted);
+      font-size: clamp(14px, 1.1vw, 16px);
+      letter-spacing: 0.02em;
+    }
+    .big {
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 800;
+    }
+    .barcode {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    input {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.3);
+      color: var(--text);
+      font-size: 16px;
+      width: 180px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      background: rgba(0,194,255,0.18);
+      border: 1px solid rgba(0,194,255,0.4);
+      border-radius: 10px;
+      font-weight: 700;
+      color: #c4eeff;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <header>
+      <h1>拍賣台 · 批次呈現</h1>
+      <div class="kbd"><span>←</span><span>→</span> 快捷鍵切換 · 條碼跳轉</div>
+    </header>
+
+    <div class="hero" id="hero">
+      <img id="heroImg" src="" alt="商品圖">
+      <div class="overlay" id="overlayText">批次</div>
+    </div>
+
+    <div class="panel">
+      <div class="row">
+        <div>
+          <div class="label">品項</div>
+          <div class="big" id="itemName">--</div>
+        </div>
+        <div>
+          <div class="label">品級</div>
+          <div class="big" id="grade">--</div>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <div class="label">批次</div>
+          <div id="batch">--</div>
+        </div>
+        <div>
+          <div class="label">箱數</div>
+          <div id="boxes">--</div>
+        </div>
+      </div>
+      <div>
+        <div class="label">裁價摘要</div>
+        <div id="summary">--</div>
+      </div>
+      <div>
+        <div class="label">起拍價</div>
+        <div id="price" class="big" style="font-size:32px;">--</div>
+      </div>
+      <div class="barcode">
+        <span class="pill">條碼掃描</span>
+        <input id="barcode" placeholder="輸入/掃描批次碼">
+      </div>
+      <div>
+        <div class="label">關鍵參數</div>
+        <div id="params" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const data = [
+      { batch: 'A-201', item: '高麗菜 (201)', grade: 'A', boxes: 18, price: 'NT$ 460', summary: '緊實度佳，外葉已修剪', params: { compactness: 'firm', avg_weight: '2.1kg', leaf_condition: 'excellent', trim_status: 'clean' }, img: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1600&q=80' },
+      { batch: 'B-101', item: '蘋果 (101)', grade: 'A', boxes: 20, price: 'NT$ 720', summary: '糖度 14.5，著色 90%，5A', params: { brix: '14.5', color_coverage: '90%', size_count: '5A', russeting: '無', crispness_score: '9' }, img: 'https://images.unsplash.com/photo-1459411621453-7b03977f8316?auto=format&fit=crop&w=1600&q=80' },
+      { batch: 'C-305', item: '筊白筍 (305)', grade: 'B', boxes: 15, price: 'NT$ 390', summary: '白嫩去殼，長 20cm', params: { flesh_color: 'white', shell_status: 'shelled', fibrosity: 'tender', length_cm: '20' }, img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1600&q=80' }
+    ];
+    let idx = 0;
+
+    const heroImg = document.getElementById('heroImg');
+    const overlayText = document.getElementById('overlayText');
+    const itemName = document.getElementById('itemName');
+    const grade = document.getElementById('grade');
+    const batch = document.getElementById('batch');
+    const boxes = document.getElementById('boxes');
+    const summary = document.getElementById('summary');
+    const price = document.getElementById('price');
+    const params = document.getElementById('params');
+    const barcode = document.getElementById('barcode');
+
+    function render() {
+      const row = data[idx];
+      heroImg.src = row.img;
+      overlayText.textContent = row.batch + ' · ' + row.item;
+      itemName.textContent = row.item;
+      grade.textContent = row.grade;
+      batch.textContent = row.batch;
+      boxes.textContent = row.boxes + ' 箱';
+      summary.textContent = row.summary;
+      price.textContent = row.price;
+      params.innerHTML = '';
+      Object.entries(row.params || {}).forEach(([k,v]) => {
+        const pill = document.createElement('span');
+        pill.className = 'pill';
+        pill.textContent = k + ': ' + v;
+        params.appendChild(pill);
+      });
+    }
+    function jumpByBarcode(code) {
+      const found = data.findIndex(d => d.batch.toLowerCase() === code.toLowerCase());
+      if (found >= 0) { idx = found; render(); }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { idx = (idx + 1) % data.length; render(); }
+      if (e.key === 'ArrowLeft') { idx = (idx - 1 + data.length) % data.length; render(); }
+    });
+    barcode.addEventListener('change', () => {
+      jumpByBarcode(barcode.value.trim());
+      barcode.value = '';
+    });
+
+    render();
+  </script>
+</body>
+</html>

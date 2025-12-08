@@ -1,0 +1,11 @@
+batch_id,product_id,item,final_grade,boxes,price,source,quality_data,note,updated_at
+A-201,201,"高麗菜","A",18,"NT$460","FA-0921","{""compactness"":""firm"",""avg_weight"":2.1,""leaf_condition"":""excellent""}","初始資料","2024-08-18T09:10:00Z"
+B-101,101,"蘋果","A",20,"NT$720","FA-0921","{""brix"":14.5,""color_coverage"":90,""size_count"":""5A""}","初始資料","2024-08-18T10:05:00Z"
+C-305,305,"筊白筍","B",15,"NT$390","FA-1102","{""length_cm"":20,""flesh_color"":""white"",""fibrosity"":""tender""}","初始資料","2024-08-18T10:40:00Z"
+D-201,201,"高麗菜","A",16,"NT$455","FA-1102","{""compactness"":""firm"",""trim_status"":""clean""}","初始資料","2024-08-18T11:05:00Z"
+E-101,101,"蘋果","B",18,"NT$650","FA-2201","{""brix"":13.8,""color_coverage"":80,""size_count"":""6A""}","初始資料","2024-08-18T11:30:00Z"
+F-305,305,"筊白筍","A",12,"NT$430","FA-2201","{""shell_status"":""shelled"",""length_cm"":19}","初始資料","2024-08-18T11:55:00Z"
+G-201,201,"高麗菜","C",14,"NT$320","FA-3301","{""compactness"":""loose"",""defects"":[""裂痕""]}","初始資料","2024-08-18T12:10:00Z"
+H-101,101,"蘋果","A",24,"NT$740","FA-3301","{""brix"":15.0,"""color_coverage"":92,""size_count"":""5A""}","初始資料","2024-08-18T12:40:00Z"
+I-305,305,"筊白筍","B",10,"NT$360","FA-4401","{""fibrosity"":""normal"",""length_cm"":17}","初始資料","2024-08-18T13:00:00Z"
+J-101,101,"蘋果","C",14,"NT$540","FA-5501","{""russeting"":true,""brix"":12.8}","初始資料","2024-08-18T13:20:00Z"

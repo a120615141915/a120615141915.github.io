@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>農產批發市場 - 整合展示系統 (MVP)</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js (用於儀表板) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9', // Sky 500
+                        secondary: '#64748b', // Slate 500
+                        success: '#22c55e', // Green 500
+                        warning: '#eab308', // Yellow 500
+                        danger: '#ef4444', // Red 500
+                        cabbage: '#4ade80',
+                        apple: '#f43f5e',
+                        bamboo: '#fcd34d'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 自定義樣式補充 */
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
+        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view-section.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .auction-text-giant { font-size: 4rem; line-height: 1; }
+        
+        /* 儀表板卡片特效 */
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-800">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-slate-900 text-white shadow-lg z-50 shrink-0">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-14">
+                <div class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-seedling text-green-400"></i> 農產拍賣 MVP
+                </div>
+                <div class="flex space-x-1 overflow-x-auto no-scrollbar py-2" id="nav-buttons">
+                    <button onclick="switchRole('driver')" class="nav-btn px-3 py-1 rounded text-sm bg-primary text-white hover:bg-sky-400 transition" data-target="driver">司機</button>
+                    <button onclick="switchRole('tally')" class="nav-btn px-3 py-1 rounded text-sm text-slate-300 hover:bg-slate-700 transition" data-target="tally">理貨員</button>
+                    <button onclick="switchRole('pricer')" class="nav-btn px-3 py-1 rounded text-sm text-slate-300 hover:bg-slate-700 transition" data-target="pricer">裁價員</button>
+                    <button onclick="switchRole('auction')" class="nav-btn px-3 py-1 rounded text-sm text-slate-300 hover:bg-slate-700 transition" data-target="auction">拍賣台</button>
+                    <button onclick="switchRole('dashboard')" class="nav-btn px-3 py-1 rounded text-sm text-slate-300 hover:bg-slate-700 transition border border-slate-600" data-target="dashboard">總經理儀表板</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="flex-1 overflow-y-auto relative bg-slate-50 p-4" id="main-container">
+
+        <!-- ==================== 1. 司機 App (Driver) ==================== -->
+        <section id="view-driver" class="view-section active max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-sky-600 p-4 text-white flex justify-between items-center">
+                <h2 class="text-xl font-bold"><i class="fa-solid fa-truck-fast mr-2"></i>進場登錄</h2>
+                <span class="text-xs bg-white/20 px-2 py-1 rounded">ID: D-9527</span>
+            </div>
+            
+            <div class="p-5 space-y-4">
+                <!-- 模擬 GPS 與車位指引 -->
+                <div class="bg-sky-50 p-4 rounded-lg border border-sky-100 flex items-start gap-3">
+                    <i class="fa-solid fa-location-dot text-sky-500 mt-1"></i>
+                    <div>
+                        <p class="text-sm font-bold text-sky-800">系統指派車位：C-12 區</p>
+                        <p class="text-xs text-slate-500">目前排隊順序：第 3 順位 (預計 10 分鐘)</p>
+                    </div>
+                </div>
+
+                <form onsubmit="handleDriverSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">進場批次 ID</label>
+                        <input type="text" value="UUID-20231208-A01" readonly class="w-full bg-slate-100 border-slate-300 rounded-lg text-slate-500 px-3 py-2 border font-mono text-xs">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">農民來源 ID</label>
+                        <input type="text" value="SUP-882 (張大明)" readonly class="w-full bg-slate-100 border-slate-300 rounded-lg text-slate-500 px-3 py-2 border">
+                    </div>
+
+                    <div class="p-3 border rounded-lg bg-slate-50">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">登錄品項 (MVP)</label>
+                        <select id="driverProductSelect" class="w-full border-slate-300 rounded-lg px-3 py-2 border focus:ring-2 focus:ring-sky-500 outline-none mb-2">
+                            <option value="201">🥬 201 - 高麗菜</option>
+                            <option value="101">🍎 101 - 富士蘋果</option>
+                            <option value="305">🎋 305 - 筊白筍</option>
+                        </select>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" placeholder="箱數" class="border p-2 rounded w-full">
+                            <input type="number" placeholder="預估重量(kg)" class="border p-2 rounded w-full">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-lg shadow transition flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-check"></i> 確認進場
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==================== 2. 理貨員 App (Tally) ==================== -->
+        <section id="view-tally" class="view-section max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-slate-700 p-4 text-white flex justify-between items-center">
+                <h2 class="text-xl font-bold"><i class="fa-solid fa-boxes-packing mr-2"></i>理貨補登</h2>
+            </div>
+
+            <div class="p-5 space-y-4">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm text-yellow-800">
+                    <p>⚠️ 偵測到一筆資料缺漏品項，請協助補登。</p>
+                </div>
+
+                <!-- 拍照區塊 -->
+                <div class="relative group cursor-pointer" onclick="document.getElementById('cameraInput').click()">
+                    <div id="imagePreviewBox" class="h-48 bg-slate-100 border-2 border-dashed border-slate-400 rounded-xl flex flex-col items-center justify-center text-slate-500 hover:bg-slate-200 transition overflow-hidden">
+                        <i class="fa-solid fa-camera text-4xl mb-2"></i>
+                        <span class="text-sm">拍照上傳 (AI 輔助辨識)</span>
+                        <img id="previewImg" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                    </div>
+                </div>
+                <input type="file" id="cameraInput" accept="image/*" class="hidden" onchange="handleImageUpload(this)">
+
+                <!-- AI 辨識結果 -->
+                <div id="aiResultArea" class="hidden space-y-3 animate-pulse">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-600">AI 預測結果:</span>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">信心度 98%</span>
+                    </div>
+                    <div class="p-3 bg-slate-100 rounded-lg font-mono text-sm">
+                        product_id: <span class="text-blue-600 font-bold">101</span><br>
+                        name: <span class="text-blue-600 font-bold">富士蘋果</span>
+                    </div>
+                    <button onclick="confirmTally()" class="w-full bg-slate-800 text-white py-2 rounded-lg">確認無誤並送出</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 3. 裁價員 App (Pricer - Dynamic Schema) ==================== -->
+        <section id="view-pricer" class="view-section max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-indigo-600 p-4 text-white flex justify-between items-center">
+                <h2 class="text-xl font-bold"><i class="fa-solid fa-gavel mr-2"></i>裁價審核</h2>
+                <div class="text-xs text-indigo-200">待審核: 3</div>
+            </div>
+
+            <!-- 模擬：切換不同待審核商品以展示動態表單 -->
+            <div class="bg-indigo-50 p-2 flex gap-2 overflow-x-auto">
+                <button onclick="renderPricerForm('201')" class="text-xs px-3 py-1 bg-white border border-indigo-200 rounded-full hover:bg-indigo-100 focus:ring-2 ring-indigo-500">🥬 高麗菜</button>
+                <button onclick="renderPricerForm('101')" class="text-xs px-3 py-1 bg-white border border-indigo-200 rounded-full hover:bg-indigo-100 focus:ring-2 ring-indigo-500">🍎 蘋果</button>
+                <button onclick="renderPricerForm('305')" class="text-xs px-3 py-1 bg-white border border-indigo-200 rounded-full hover:bg-indigo-100 focus:ring-2 ring-indigo-500">🎋 筊白筍</button>
+            </div>
+
+            <div class="p-5">
+                <!-- 商品基本資訊 -->
+                <div class="flex gap-4 mb-6">
+                    <img id="pricer-img" src="" class="w-20 h-20 rounded-lg object-cover bg-slate-200">
+                    <div>
+                        <h3 id="pricer-name" class="font-bold text-lg text-slate-800">--</h3>
+                        <p id="pricer-id" class="text-xs text-slate-500 font-mono">ID: --</p>
+                        <p class="text-xs text-slate-500 mt-1">來源: 張大明 (雲林)</p>
+                    </div>
+                </div>
+
+                <form onsubmit="handlePricerSubmit(event)" class="space-y-4">
+                    <div class="border-t border-slate-200 my-2 pt-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-3">Dynamic Quality Data (Hybrid Schema)</p>
+                        <!-- 動態欄位容器 -->
+                        <div id="dynamic-form-container" class="space-y-4">
+                            <!-- JS 將在此渲染欄位 -->
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-200">
+                        <label class="block text-sm font-bold text-slate-700 mb-1">綜合品級 (Final Grade)</label>
+                        <select class="w-full border-slate-300 rounded-lg px-3 py-2 border bg-indigo-50 font-bold text-indigo-700">
+                            <option value="S">特級 (S)</option>
+                            <option value="A">優級 (A)</option>
+                            <option value="B">良級 (B)</option>
+                            <option value="C">普級 (C)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow transition">
+                        提交評級
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==================== 4. 拍賣台 (Auction) ==================== -->
+        <section id="view-auction" class="view-section w-full h-full bg-black text-white p-6 hidden">
+            <div class="grid grid-cols-12 gap-6 h-full">
+                <!-- 左側：商品大圖 -->
+                <div class="col-span-5 bg-zinc-900 rounded-3xl overflow-hidden relative border border-zinc-700 flex items-center justify-center">
+                    <img id="auctionImg" src="" class="w-full h-full object-cover opacity-90">
+                    <div class="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 text-xl font-bold rounded shadow-lg animate-pulse">
+                        LIVE
+                    </div>
+                    <div class="absolute bottom-6 left-6 right-6">
+                        <div class="bg-black/70 backdrop-blur-md p-4 rounded-xl border border-white/10">
+                            <p class="text-zinc-400 text-sm mb-1">供應商</p>
+                            <p class="text-xl font-bold text-white">SUP-882 張大明</p>
+                            <p class="text-zinc-400 text-sm mt-2">產地</p>
+                            <p class="text-xl font-bold text-white">雲林西螺</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側：拍賣資訊 -->
+                <div class="col-span-7 flex flex-col justify-between pl-4">
+                    <div>
+                        <div class="flex justify-between items-end border-b border-zinc-800 pb-4 mb-4">
+                            <span class="text-zinc-500 text-2xl font-mono" id="auctionBatch">UUID-20231208-A01</span>
+                            <span class="text-4xl font-bold px-4 py-1 rounded bg-yellow-500 text-black" id="auctionGrade">S</span>
+                        </div>
+                        
+                        <h1 class="text-white font-bold auction-text-giant mb-6" id="auctionItemName">--</h1>
+                        
+                        <!-- 動態關鍵屬性顯示區 -->
+                        <div id="auction-dynamic-attrs" class="grid grid-cols-2 gap-4 mb-8">
+                            <!-- JS 渲染 -->
+                        </div>
+                    </div>
+
+                    <!-- 價格區 -->
+                    <div class="bg-zinc-900 rounded-2xl p-8 border border-yellow-500/30 shadow-[0_0_50px_rgba(234,179,8,0.1)]">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-yellow-500 text-2xl mb-1">起拍價 (Start Price)</p>
+                                <p class="text-8xl font-bold text-white font-mono">$<span id="auctionPrice">--</span></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-zinc-500 text-xl mb-2">每箱重量</p>
+                                <p class="text-4xl font-bold text-white font-mono" id="auctionWeight">-- kg</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between text-zinc-600 mt-4 text-sm">
+                        <span>[Space] 下一筆商品</span>
+                        <span>[A] 自動競價模式</span>
+                        <button onclick="nextAuctionItem()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-1 rounded border border-zinc-700">下一筆 (Demo)</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 5. 總經理儀表板 (Dashboard) ==================== -->
+        <section id="view-dashboard" class="view-section w-full max-w-7xl mx-auto space-y-6 pb-20">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">📊 營運總覽 (GM Dashboard)</h2>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="stat-card bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-500 text-sm">今日總進場量</p>
+                            <h3 class="text-2xl font-bold text-slate-800 mt-1">12,450 <span class="text-sm font-normal text-slate-400">kg</span></h3>
+                        </div>
+                        <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i class="fa-solid fa-scale-balanced"></i></div>
+                    </div>
+                    <p class="text-xs text-green-600 mt-3"><i class="fa-solid fa-arrow-trend-up"></i> 較昨日 +5.2%</p>
+                </div>
+
+                <div class="stat-card bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-500 text-sm">平均成交價</p>
+                            <h3 class="text-2xl font-bold text-slate-800 mt-1">$ 42.8</h3>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded-lg text-yellow-600"><i class="fa-solid fa-sack-dollar"></i></div>
+                    </div>
+                    <p class="text-xs text-red-500 mt-3"><i class="fa-solid fa-arrow-trend-down"></i> 較昨日 -1.2%</p>
+                </div>
+
+                <div class="stat-card bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-500 text-sm">特級品 (Grade S) 佔比</p>
+                            <h3 class="text-2xl font-bold text-slate-800 mt-1">28%</h3>
+                        </div>
+                        <div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i class="fa-solid fa-crown"></i></div>
+                    </div>
+                    <div class="w-full bg-slate-100 h-1.5 mt-3 rounded-full overflow-hidden">
+                        <div class="bg-purple-500 h-1.5 rounded-full" style="width: 28%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-white p-5 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-red-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-slate-500 text-sm">品質異常預警</p>
+                            <h3 class="text-2xl font-bold text-red-600 mt-1">3 件</h3>
+                        </div>
+                        <div class="p-2 bg-red-50 rounded-lg text-red-600"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-3">主要原因: 蘋果果鏽過高</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 圖表區 -->
+                <div class="col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-slate-700 mb-4">即時成交行情 (By Product)</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 即時進場清單 -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-slate-700 mb-4">最新進場批次</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center p-2 hover:bg-slate-50 rounded transition border-b border-slate-100">
+                            <div class="w-2 h-8 bg-green-400 rounded-full mr-3"></div>
+                            <div class="flex-1">
+                                <p class="text-sm font-bold text-slate-800">高麗菜 (201)</p>
+                                <p class="text-xs text-slate-500">10:42 AM • 50箱</p>
+                            </div>
+                            <span class="text-xs font-bold px-2 py-1 bg-green-100 text-green-700 rounded">S級</span>
+                        </div>
+                        <div class="flex items-center p-2 hover:bg-slate-50 rounded transition border-b border-slate-100">
+                            <div class="w-2 h-8 bg-red-400 rounded-full mr-3"></div>
+                            <div class="flex-1">
+                                <p class="text-sm font-bold text-slate-800">富士蘋果 (101)</p>
+                                <p class="text-xs text-slate-500">10:38 AM • 20箱</p>
+                            </div>
+                            <span class="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded">A級</span>
+                        </div>
+                        <div class="flex items-center p-2 hover:bg-slate-50 rounded transition border-b border-slate-100">
+                            <div class="w-2 h-8 bg-yellow-400 rounded-full mr-3"></div>
+                            <div class="flex-1">
+                                <p class="text-sm font-bold text-slate-800">筊白筍 (305)</p>
+                                <p class="text-xs text-slate-500">10:30 AM • 100束</p>
+                            </div>
+                            <span class="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-600 rounded">B級</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Components -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl text-center">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-primary mb-3"></i>
+            <p class="font-bold text-slate-700" id="loadingText">處理中...</p>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 z-[100] pointer-events-none flex items-center gap-2">
+        <i class="fa-solid fa-check-circle text-green-400"></i>
+        <span id="toastMsg">操作成功</span>
+    </div>
+
+    <script>
+        // ============ 核心資料結構: Products & Schemas ============
+        const productDB = {
+            '201': {
+                name: '高麗菜',
+                img: 'https://images.unsplash.com/photo-1596706013686-f4044199c086?w=400',
+                schema: [
+                    { key: 'compactness', label: '結球緊實度', type: 'select', options: ['firm (緊實)', 'loose (鬆散)'] },
+                    { key: 'avg_weight', label: '平均單顆重 (kg)', type: 'number', step: 0.1 },
+                    { key: 'leaf_condition', label: '葉面狀況', type: 'select', options: ['excellent (優)', 'good (良)', 'bug_bitten (蟲咬)'] },
+                    { key: 'trim_status', label: '修整狀況', type: 'select', options: ['clean (乾淨)', 'needs_trim (需修整)'] }
+                ]
+            },
+            '101': {
+                name: '富士蘋果',
+                img: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400',
+                schema: [
+                    { key: 'brix', label: '糖度 (Brix)', type: 'number', step: 0.1 },
+                    { key: 'color_coverage', label: '著色度 (%)', type: 'range', min: 0, max: 100 },
+                    { key: 'size_count', label: '規格 (Size)', type: 'select', options: ['4A', '5A', '6A', '8A'] },
+                    { key: 'russeting', label: '有無果鏽', type: 'boolean' }, // radio yes/no
+                    { key: 'crispness_score', label: '清脆度 (1-10)', type: 'number', min: 1, max: 10 }
+                ]
+            },
+            '305': {
+                name: '筊白筍',
+                img: 'https://plus.unsplash.com/premium_photo-1675364676510-18e00184468d?w=400',
+                schema: [
+                    { key: 'flesh_color', label: '筍肉顏色', type: 'select', options: ['white (白皙)', 'yellowish (偏黃)'] },
+                    { key: 'black_heart', label: '黑心狀況', type: 'boolean' },
+                    { key: 'shell_status', label: '帶殼狀況', type: 'select', options: ['shelled (去殼)', 'unshelled (帶殼)'] },
+                    { key: 'length_cm', label: '長度 (cm)', type: 'number' }
+                ]
+            }
+        };
+
+        // 模擬的拍賣批次資料 (Batches with Hybrid Schema Data) - 擴充至 10 筆
+        const auctionQueue = [
+            {
+                batch_id: 'UUID-882-01', product_id: '101',
+                weight: 20, start_price: 120, grade: 'S',
+                quality_data: { brix: 16.5, color_coverage: 95, size_count: '4A', russeting: false, crispness_score: 10 }
+            },
+            {
+                batch_id: 'UUID-882-02', product_id: '201',
+                weight: 25, start_price: 45, grade: 'A',
+                quality_data: { compactness: 'firm', avg_weight: 2.3, leaf_condition: 'excellent', trim_status: 'clean' }
+            },
+            {
+                batch_id: 'UUID-882-03', product_id: '305',
+                weight: 15, start_price: 160, grade: 'S',
+                quality_data: { flesh_color: 'white', black_heart: false, shell_status: 'shelled', length_cm: 24, fibrosity: 'tender' }
+            },
+            {
+                batch_id: 'UUID-882-04', product_id: '101',
+                weight: 18, start_price: 85, grade: 'B',
+                quality_data: { brix: 12.0, color_coverage: 70, size_count: '6A', russeting: true, crispness_score: 7 }
+            },
+            {
+                batch_id: 'UUID-882-05', product_id: '201',
+                weight: 30, start_price: 25, grade: 'C',
+                quality_data: { compactness: 'loose', avg_weight: 1.5, leaf_condition: 'bug_bitten', trim_status: 'needs_trim' }
+            },
+            {
+                batch_id: 'UUID-882-06', product_id: '305',
+                weight: 12, start_price: 110, grade: 'A',
+                quality_data: { flesh_color: 'white', black_heart: false, shell_status: 'shelled', length_cm: 20, fibrosity: 'tender' }
+            },
+            {
+                batch_id: 'UUID-882-07', product_id: '101',
+                weight: 22, start_price: 105, grade: 'A',
+                quality_data: { brix: 14.0, color_coverage: 85, size_count: '5A', russeting: false, crispness_score: 8 }
+            },
+            {
+                batch_id: 'UUID-882-08', product_id: '201',
+                weight: 28, start_price: 55, grade: 'S',
+                quality_data: { compactness: 'firm', avg_weight: 2.8, leaf_condition: 'excellent', trim_status: 'clean' }
+            },
+            {
+                batch_id: 'UUID-882-09', product_id: '305',
+                weight: 20, start_price: 80, grade: 'B',
+                quality_data: { flesh_color: 'yellowish', black_heart: false, shell_status: 'unshelled', length_cm: 18, fibrosity: 'fibrous' }
+            },
+            {
+                batch_id: 'UUID-882-10', product_id: '101',
+                weight: 19, start_price: 135, grade: 'S',
+                quality_data: { brix: 17.2, color_coverage: 98, size_count: '4A', russeting: false, crispness_score: 9 }
+            }
+        ];
+        let currentAuctionIdx = 0;
+
+        // ============ UI 邏輯 ============
+
+        function switchRole(roleId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.target === roleId) {
+                    btn.classList.add('bg-primary', 'text-white', 'border-transparent');
+                    btn.classList.remove('text-slate-300', 'border-slate-600');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-white', 'border-transparent');
+                    btn.classList.add('text-slate-300');
+                    if (btn.dataset.target === 'dashboard') btn.classList.add('border-slate-600');
+                }
+            });
+
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            const targetSection = document.getElementById(`view-${roleId}`);
+            if(targetSection) targetSection.classList.add('active');
+
+            // 處理拍賣台全螢幕模式
+            const mainContainer = document.getElementById('main-container');
+            if (roleId === 'auction') {
+                mainContainer.classList.add('bg-black', 'p-0');
+                mainContainer.classList.remove('bg-slate-50', 'p-4');
+                renderAuctionScreen(); // 渲染第一筆
+            } else {
+                mainContainer.classList.remove('bg-black', 'p-0');
+                mainContainer.classList.add('bg-slate-50', 'p-4');
+            }
+
+            // 初始化圖表
+            if (roleId === 'dashboard') {
+                initChart();
+            }
+        }
+
+        // --- 裁價員動態表單邏輯 (Dynamic Form Engine) ---
+        function renderPricerForm(productId) {
+            const product = productDB[productId];
+            if(!product) return;
+
+            // Update Header Info
+            document.getElementById('pricer-img').src = product.img;
+            document.getElementById('pricer-name').innerText = `${product.name} (MVP)`;
+            document.getElementById('pricer-id').innerText = `Product ID: ${productId}`;
+
+            const container = document.getElementById('dynamic-form-container');
+            container.innerHTML = ''; // Clear existing form
+
+            // Generate Inputs based on Schema
+            product.schema.forEach(field => {
+                let inputHtml = '';
+                
+                if (field.type === 'select') {
+                    const options = field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                    inputHtml = `<select class="w-full border-slate-300 rounded px-3 py-2 border bg-white">${options}</select>`;
+                } else if (field.type === 'boolean') {
+                    inputHtml = `
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="${field.key}" value="true" class="accent-indigo-600"> 是 (Yes)
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="${field.key}" value="false" class="accent-indigo-600" checked> 否 (No)
+                            </label>
+                        </div>
+                    `;
+                } else if (field.type === 'range') {
+                    inputHtml = `
+                        <div class="flex items-center gap-2">
+                            <input type="range" min="${field.min}" max="${field.max}" class="flex-1 accent-indigo-600" oninput="this.nextElementSibling.innerText = this.value + '%'">
+                            <span class="font-bold text-indigo-600 w-10 text-right">50%</span>
+                        </div>
+                    `;
+                } else {
+                    // number
+                    inputHtml = `<input type="number" step="${field.step || 1}" class="w-full border-slate-300 rounded px-3 py-2 border">`;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `
+                    <label class="block text-sm text-slate-600 mb-1">${field.label} <span class="text-xs text-slate-400 font-mono">(${field.key})</span></label>
+                    ${inputHtml}
+                `;
+                container.appendChild(wrapper);
+            });
+        }
+
+        // --- 拍賣台邏輯 ---
+        function renderAuctionScreen() {
+            const batch = auctionQueue[currentAuctionIdx];
+            const product = productDB[batch.product_id];
+
+            document.getElementById('auctionImg').src = product.img;
+            document.getElementById('auctionItemName').innerText = product.name;
+            document.getElementById('auctionBatch').innerText = batch.batch_id;
+            document.getElementById('auctionPrice').innerText = batch.start_price;
+            document.getElementById('auctionWeight').innerText = `${batch.weight} kg`;
+            document.getElementById('auctionGrade').innerText = batch.grade;
+
+            // 動態屬性顯示
+            const attrsContainer = document.getElementById('auction-dynamic-attrs');
+            attrsContainer.innerHTML = '';
+            
+            // 將 quality_data 的 key 轉為易讀格式顯示
+            Object.entries(batch.quality_data).forEach(([key, value]) => {
+                // 簡易 mapping，實際專案可用 schema 的 label
+                let displayKey = key;
+                let displayVal = value;
+                
+                // 特殊顯示邏輯
+                if(key === 'brix') { displayKey = '糖度'; displayVal += ' °Bx'; }
+                if(key === 'color_coverage') { displayKey = '著色'; displayVal += '%'; }
+                if(key === 'black_heart') { displayKey = '黑心'; displayVal = value ? '有' : '無'; }
+                if(key === 'compactness') { displayKey = '緊實度'; }
+
+                const div = document.createElement('div');
+                div.className = 'bg-zinc-800 p-3 rounded-lg border-l-4 border-zinc-600';
+                div.innerHTML = `
+                    <p class="text-zinc-500 text-sm mb-1 uppercase">${displayKey}</p>
+                    <p class="text-2xl font-bold text-white">${displayVal}</p>
+                `;
+                attrsContainer.appendChild(div);
+            });
+        }
+
+        function nextAuctionItem() {
+            currentAuctionIdx = (currentAuctionIdx + 1) % auctionQueue.length;
+            
+            // 動畫過場
+            const section = document.getElementById('view-auction');
+            section.style.opacity = 0;
+            setTimeout(() => {
+                renderAuctionScreen();
+                section.style.opacity = 1;
+            }, 200);
+        }
+
+        // 鍵盤控制
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('view-auction').classList.contains('active') && e.code === 'Space') {
+                e.preventDefault();
+                nextAuctionItem();
+            }
+        });
+
+        // --- 總經理儀表板圖表 ---
+        let chartInstance = null;
+        function initChart() {
+            if(chartInstance) return; // 避免重複渲染
+            
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['富士蘋果', '高麗菜', '筊白筍'],
+                    datasets: [{
+                        label: '今日平均成交價 (NTD/kg)',
+                        data: [125, 42, 160],
+                        backgroundColor: [
+                            'rgba(244, 63, 94, 0.7)', // Apple Red
+                            'rgba(74, 222, 128, 0.7)', // Cabbage Green
+                            'rgba(252, 211, 77, 0.7)'  // Bamboo Yellow
+                        ],
+                        borderColor: [
+                            'rgb(244, 63, 94)',
+                            'rgb(74, 222, 128)',
+                            'rgb(252, 211, 77)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // --- 表單提交處理 (模擬) ---
+        function showLoading(text, cb) {
+            document.getElementById('loadingText').innerText = text;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                cb && cb();
+            }, 1000);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.remove('opacity-0');
+            setTimeout(() => t.classList.add('opacity-0'), 3000);
+        }
+
+        function handleDriverSubmit(e) {
+            e.preventDefault();
+            showLoading('正在寫入批次資料 (Batches Table)...', () => {
+                showToast('進場登錄成功！');
+                e.target.reset();
+            });
+        }
+
+        function handleImageUpload(input) {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('previewImg').classList.remove('hidden');
+                    showLoading('AI 影像分析中...', () => {
+                        document.getElementById('aiResultArea').classList.remove('hidden');
+                        showToast('AI 辨識完成');
+                    });
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function confirmTally() {
+            showLoading('補登資料上鏈中...', () => {
+                showToast('理貨作業完成');
+                document.getElementById('aiResultArea').classList.add('hidden');
+                document.getElementById('previewImg').classList.add('hidden');
+            });
+        }
+
+        function handlePricerSubmit(e) {
+            e.preventDefault();
+            showLoading('寫入 JSON Grading Schema...', () => {
+                showToast('裁價完成，已更新批次狀態');
+                // 簡單切換到下一個
+                const nextId = ['201', '101', '305'][Math.floor(Math.random()*3)];
+                renderPricerForm(nextId);
+            });
+        }
+
+        // 初始化
+        renderPricerForm('201'); // 預設載入高麗菜表單
+    </script>
+</body>
+</html>
