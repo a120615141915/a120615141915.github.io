@@ -2,149 +2,141 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>總經理儀表板</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0b111d;
-      --card: rgba(255,255,255,0.05);
-      --accent: #6c63ff;
-      --accent-2: #20c997;
-      --text: #f4f7ff;
-      --muted: #a9b5cc;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      background: radial-gradient(circle at 30% 20%, rgba(108,99,255,0.16), transparent 32%), radial-gradient(circle at 80% 30%, rgba(32,201,151,0.14), transparent 30%), var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 22px;
-      display: grid;
-      gap: 16px;
-    }
-    header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    h1 { margin: 0; font-size: 28px; }
-    .pill { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: var(--muted); font-weight: 700; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 14px;
-      padding: 14px;
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 10px 28px rgba(0,0,0,0.32);
-    }
-    .stat {
-      font-size: 28px;
-      font-weight: 800;
-    }
-    .muted { color: var(--muted); font-size: 13px; }
-    .progress {
-      height: 10px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-    .bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
-    .chart {
-      display: grid;
-      gap: 8px;
-    }
-    .row { display: flex; justify-content: space-between; align-items: center; }
-    table { width: 100%; border-collapse: collapse; color: var(--text); }
-    th, td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: left; }
-    th { color: var(--muted); font-weight: 600; }
-    @media (max-width: 720px) { table { font-size: 14px; } }
-  </style>
+  <title>Dashboard | TAPMC</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="common.js"></script>
 </head>
 <body>
-  <header>
-    <h1>總經理儀表板 (MVP)</h1>
-    <div class="pill">批次來源：batches / products · JSON quality_data</div>
-  </header>
+  <div class="page">
+    <div class="nav">
+      <div>
+        <h1>GM Dashboard</h1>
+        <div class="small">使用 MockDB 計算 KPI 與匯出。</div>
+      </div>
+      <a class="pill" href="index.html">⬅ 回到首頁</a>
+    </div>
 
-  <div class="grid">
     <div class="card">
-      <div class="muted">今日進場量 (批次)</div>
-      <div class="stat" id="arrival">--</div>
-      <div class="progress"><div class="bar" style="width:72%;"></div></div>
-      <div class="muted">較昨日 +8%</div>
+      <div class="input-row">
+        <div style="flex:1;">
+          <label for="gmId">GM ID（匯出必填）</label>
+          <input id="gmId" type="text" placeholder="gm01">
+        </div>
+        <div class="input-row">
+          <button class="btn secondary" id="refreshBtn">重新計算</button>
+          <button class="btn" id="exportBtn">匯出 CSV</button>
+        </div>
+      </div>
     </div>
-    <div class="card">
-      <div class="muted">特級品比例 (final_grade=A)</div>
-      <div class="stat" id="gradeA">--</div>
-      <div class="progress"><div class="bar" style="width:64%;"></div></div>
-      <div class="muted">目標 70%</div>
-    </div>
-    <div class="card">
-      <div class="muted">平均成交價</div>
-      <div class="stat" id="avgPrice">--</div>
-      <div class="muted">含稅 / 近期 7 日</div>
-    </div>
-    <div class="card">
-      <div class="muted">退貨率</div>
-      <div class="stat" id="returns">--</div>
-      <div class="progress"><div class="bar" style="width:8%; background: linear-gradient(90deg,#ff6f61,#ffb84d);"></div></div>
-      <div class="muted">連續 3 日低於 2%</div>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="row">
-      <div style="font-weight:700;">商品分佈</div>
-      <div class="muted">依 product_id 聚合</div>
+    <div class="grid" style="margin-top:16px;">
+      <div class="card">
+        <h3>KPI</h3>
+        <div id="kpiRow" class="grid"></div>
+      </div>
+      <div class="card">
+        <h3>狀態分佈</h3>
+        <div id="statusBars"></div>
+      </div>
     </div>
-    <div class="chart" id="distribution"></div>
-  </div>
 
-  <div class="card">
-    <div class="row">
-      <div style="font-weight:700;">批次清單 (摘要)</div>
-      <div class="muted">quality_data → 關鍵參數</div>
+    <div class="card" style="margin-top:16px;">
+      <h3>近期批次</h3>
+      <div id="recentTable" class="table-scroll"></div>
     </div>
-    <table id="batchTable">
-      <thead>
-        <tr><th>批次</th><th>商品</th><th>品級</th><th>參數</th><th>起拍價</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
   </div>
 
   <script>
-    const batches = [
-      { id: 'A-201', product: '高麗菜 (201)', final_grade: 'A', price: 'NT$460', quality_data: { compactness: 'firm', avg_weight: '2.1kg', leaf_condition: 'excellent' } },
-      { id: 'B-101', product: '蘋果 (101)', final_grade: 'A', price: 'NT$720', quality_data: { brix: '14.5', color_coverage: '90%', size_count: '5A' } },
-      { id: 'C-305', product: '筊白筍 (305)', final_grade: 'B', price: 'NT$390', quality_data: { length_cm: '20', flesh_color: 'white', fibrosity: 'tender' } }
-    ];
+    const gmIdInput = document.getElementById('gmId');
+    const kpiRow = document.getElementById('kpiRow');
+    const statusBars = document.getElementById('statusBars');
+    const recentTable = document.getElementById('recentTable');
 
-    document.getElementById('arrival').textContent = batches.length + ' 批';
-    document.getElementById('gradeA').textContent = (batches.filter(b => b.final_grade === 'A').length / batches.length * 100).toFixed(0) + '%';
-    document.getElementById('avgPrice').textContent = 'NT$523';
-    document.getElementById('returns').textContent = '1.6%';
+    function renderKpi() {
+      const rows = MockDB.getRows();
+      const total = rows.length;
+      const graded = rows.filter((r) => r.status === 'graded').length;
+      const sold = rows.filter((r) => r.status === 'sold').length;
+      const returned = rows.filter((r) => r.status === 'returned').length;
+      const avgPrice = (() => {
+        const prices = rows.filter((r) => r.start_price).map((r) => Number(r.start_price));
+        return prices.length ? (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(1) : 'N/A';
+      })();
+      kpiRow.innerHTML = `
+        <div class="card subtle"><div class="small">總筆數</div><h2>${total}</h2></div>
+        <div class="card subtle"><div class="small">已分級</div><h2>${graded}</h2></div>
+        <div class="card subtle"><div class="small">已售出</div><h2>${sold}</h2></div>
+        <div class="card subtle"><div class="small">退貨率</div><h2>${total ? Math.round((returned / total) * 100) : 0}%</h2></div>
+        <div class="card subtle"><div class="small">平均起標價</div><h2>${avgPrice}</h2></div>
+      `;
+    }
 
-    const distribution = document.getElementById('distribution');
-    ['高麗菜 (201)','蘋果 (101)','筊白筍 (305)'].forEach(name => {
-      const count = batches.filter(b => b.product === name).length;
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.innerHTML = `<div>${name}</div><div class="muted">${count} 批</div>`;
-      distribution.appendChild(row);
+    function renderStatusBars() {
+      const rows = MockDB.getRows();
+      const statuses = {};
+      rows.forEach((r) => { statuses[r.status] = (statuses[r.status] || 0) + 1; });
+      const entries = Object.entries(statuses);
+      if (!entries.length) {
+        statusBars.innerHTML = '<div class="small">無資料。</div>';
+        return;
+      }
+      const max = Math.max(...entries.map(([, v]) => v));
+      statusBars.innerHTML = entries.map(([status, count]) => `
+        <div style="margin-bottom:8px;">
+          <div class="flex between">
+            <div>${status}</div>
+            <div class="small">${count}</div>
+          </div>
+          <div class="progress"><div class="bar" style="width:${(count / max) * 100}%"></div></div>
+        </div>
+      `).join('');
+    }
+
+    function renderRecent() {
+      const rows = MockDB.getRows().sort((a, b) => Date.parse(b.updated_at || 0) - Date.parse(a.updated_at || 0)).slice(0, 8);
+      if (!rows.length) {
+        recentTable.innerHTML = '<div class="small">尚無批次。</div>';
+        return;
+      }
+      recentTable.innerHTML = `
+        <table>
+          <thead><tr><th>批次</th><th>品項</th><th>狀態</th><th>等級</th><th>起標價</th><th>更新時間</th></tr></thead>
+          <tbody>
+            ${rows.map((r) => `
+              <tr>
+                <td>${r.batch_id}</td>
+                <td>${r.item}</td>
+                <td>${tapmcUtils.statusBadge(r.status)}</td>
+                <td>${r.final_grade || '—'}</td>
+                <td>${r.start_price || '—'}</td>
+                <td class="small">${r.updated_at || ''}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function refresh() {
+      renderKpi();
+      renderStatusBars();
+      renderRecent();
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', refresh);
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const id = gmIdInput.value.trim();
+      if (!id) {
+        alert('匯出需要填 GM ID。');
+        return;
+      }
+      MockDB.exportCsv();
+      MockDB.appendLog({ role: 'GM', actor_id: id, action: 'export', ts: tapmcUtils.toOffsetIso() });
+      tapmcUtils.toast('已匯出 CSV');
     });
 
-    const tbody = document.querySelector('#batchTable tbody');
-    batches.forEach(b => {
-      const tr = document.createElement('tr');
-      const params = Object.entries(b.quality_data).map(([k,v]) => `${k}:${v}`).join(' · ');
-      tr.innerHTML = `<td>${b.id}</td><td>${b.product}</td><td>${b.final_grade}</td><td>${params}</td><td>${b.price}</td>`;
-      tbody.appendChild(tr);
-    });
+    gmIdInput.value = MockDB.getDefaultId() || '';
+    refresh();
   </script>
 </body>
 </html>

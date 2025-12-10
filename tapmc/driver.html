@@ -2,418 +2,362 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>司機貨物登錄</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0c1829;
-      --panel: rgba(255,255,255,0.06);
-      --accent: #3da9fc;
-      --accent-2: #ef4565;
-      --text: #e8f0ff;
-      --muted: #9fb3c8;
-      --success: #38d996;
-      --error: #ff7b7b;
-      --radius: 12px;
-      --shadow: 0 18px 50px rgba(0,0,0,0.35);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-      background: radial-gradient(circle at 20% 20%, rgba(61,169,252,0.18), transparent 30%), radial-gradient(circle at 80% 10%, rgba(239,69,101,0.12), transparent 28%), var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 32px;
-      display: grid;
-      place-items: center;
-    }
-    .shell {
-      width: min(1100px, 100%);
-      display: grid;
-      gap: 20px;
-      grid-template-columns: 1.2fr 1fr;
-      background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-      padding: 28px;
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(6px);
-    }
-    header {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    h1 {
-      margin: 0;
-      font-size: 28px;
-      letter-spacing: 0.02em;
-    }
-    .tag {
-      padding: 6px 10px;
-      border-radius: 8px;
-      background: rgba(61,169,252,0.14);
-      color: var(--accent);
-      font-weight: 600;
-      border: 1px solid rgba(61,169,252,0.35);
-    }
-    form {
-      display: grid;
-      gap: 14px;
-      padding: 12px;
-      background: var(--panel);
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--muted);
-    }
-    select, input, button, textarea {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(5, 16, 31, 0.8);
-      color: var(--text);
-      font-size: 15px;
-    }
-    select option {
-      background: rgba(5, 16, 31, 0.95);
-      color: var(--text);
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid var(--accent);
-      border-color: var(--accent);
-    }
-    .field {
-      position: relative;
-    }
-    .items {
-      display: grid;
-      gap: 10px;
-    }
-    .item-row {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr 0.8fr;
-      gap: 8px;
-      align-items: end;
-    }
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      background: rgba(61,169,252,0.14);
-      border-radius: 10px;
-      border: 1px solid rgba(61,169,252,0.3);
-      color: var(--accent);
-      font-weight: 700;
-    }
-    .error {
-      position: absolute;
-      bottom: -18px;
-      left: 0;
-      font-size: 12px;
-      color: var(--error);
-    }
-    .readonly {
-      background: rgba(255,255,255,0.08);
-      border-style: dashed;
-    }
-    .btn {
-      background: var(--accent);
-      color: #05101f;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 10px 25px rgba(61,169,252,0.35);
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
-    }
-    .btn:active { transform: translateY(1px); box-shadow: 0 6px 18px rgba(61,169,252,0.25); }
-    .secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: none;
-    }
-    .map {
-      background: radial-gradient(circle at 40% 40%, rgba(61,169,252,0.25), rgba(12,24,41,0.9)), url('https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=1200&q=80') center/cover;
-      height: 320px;
-      border-radius: var(--radius);
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .map-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.75));
-      padding: 18px;
-      display: grid;
-      align-content: space-between;
-      color: #f7fbff;
-    }
-    .map-stats {
-      display: flex;
-      gap: 12px;
-    }
-    .stat {
-      padding: 10px 12px;
-      background: rgba(12,24,41,0.8);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 10px;
-      min-width: 120px;
-    }
-    .loading {
-      display: none;
-      gap: 8px;
-      align-items: center;
-      color: var(--accent);
-      font-weight: 600;
-    }
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 3px solid rgba(61,169,252,0.2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 12px 16px;
-      border-radius: 10px;
-      background: var(--success);
-      color: #0b1c2e;
-      font-weight: 700;
-      box-shadow: 0 14px 34px rgba(0,0,0,0.35);
-      display: none;
-    }
-    .toast.error { background: var(--error); color: #230606; }
-  </style>
+  <title>Driver | TAPMC</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="common.js"></script>
 </head>
 <body>
-  <div class="shell">
-    <header>
+  <div class="page">
+    <div class="nav">
       <div>
-        <h1>司機｜貨物登錄</h1>
-        <div class="tag">即時驗證 · GPS 更新 · API 狀態</div>
+        <h1>Driver 工作台</h1>
+        <div class="small">建立車次後，輸入來源與品項並儲存到該車次。</div>
       </div>
-      <div class="loading" id="loadingState">
-        <div class="spinner"></div>送出中...
-      </div>
-    </header>
+      <a class="pill" href="index.html">⬅ 回到首頁</a>
+    </div>
 
-    <form id="cargoForm" novalidate>
-      <div class="field">
-        <label>批次品項與數量 *</label>
-        <div class="items" id="items"></div>
-        <button class="secondary" id="addItem" type="button">新增品項</button>
-        <div class="error" data-error-for="items"></div>
+    <div class="card">
+      <div class="input-row">
+        <div style="flex:1;">
+          <label for="driverId">Driver ID（必填）</label>
+          <input id="driverId" type="text" placeholder="driver01">
+        </div>
+        <div style="flex:1;">
+          <label for="tripSelector">車次 Trip</label>
+          <select id="tripSelector"></select>
+        </div>
+        <button class="btn" id="newTripBtn">建立新車次</button>
       </div>
+      <div class="small" style="margin-top:6px;">批次會帶入 created_by / updated_by = DRV:&lt;DriverID&gt;。</div>
+    </div>
 
-      <div class="field">
-        <label for="origin">來源（農會/農民編號） *</label>
-        <input id="origin" type="text" placeholder="例：FA-0921" required>
-        <div class="error" data-error-for="origin"></div>
-      </div>
-
-      <div class="field">
-        <label for="eta">預計抵達時間 *</label>
-        <input id="eta" type="time" required>
-        <div class="error" data-error-for="eta"></div>
-      </div>
-
-      <div class="field">
-        <label for="slot">進場時段 / 下貨車位</label>
-        <input id="slot" class="readonly" type="text" readonly value="尚未分配">
-        <div class="chip" id="slotStatus">系統排程中</div>
-      </div>
-
-      <div class="field">
-        <label for="code">批次代碼（自動產生）</label>
-        <input id="code" class="readonly" type="text" readonly>
-      </div>
-
-      <div class="field">
-        <button class="btn" type="submit">送出</button>
-      </div>
-    </form>
-
-    <div class="map">
-      <div class="map-overlay">
+    <div class="card" style="margin-top:16px;">
+      <div class="flex between">
         <div>
-          <div style="font-size:18px;font-weight:700;">地圖模組</div>
-          <div style="color:var(--muted);">顯示當前 GPS 與預估進場時間</div>
+          <h3>來源與品項</h3>
+          <p class="small">一個來源可包含多個品項，儲存後寫入選定車次。</p>
         </div>
-        <div class="map-stats">
-          <div class="stat">
-            <div style="color:var(--muted);font-size:12px;">GPS 座標</div>
-            <div id="gps">23.9739, 120.9820</div>
-          </div>
-          <div class="stat">
-            <div style="color:var(--muted);font-size:12px;">預估進場</div>
-            <div id="etaLive">--:--</div>
-          </div>
-          <div class="stat">
-            <div style="color:var(--muted);font-size:12px;">交通 API</div>
-            <div id="traffic">平順</div>
-          </div>
-        </div>
+        <button class="btn" id="addSourceBtn">新增來源</button>
       </div>
+      <div id="sourceList" class="list" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Trip 摘要</h3>
+      <div id="tripSummary"></div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
-  <script src="storage.js"></script>
   <script>
-    const form = document.getElementById('cargoForm');
-    const toast = document.getElementById('toast');
-    const loading = document.getElementById('loadingState');
-    const code = document.getElementById('code');
-    const etaLive = document.getElementById('etaLive');
-    const itemsWrap = document.getElementById('items');
-    const slot = document.getElementById('slot');
-    const slotStatus = document.getElementById('slotStatus');
+    const driverIdInput = document.getElementById('driverId');
+    const tripSelector = document.getElementById('tripSelector');
+    const sourceList = document.getElementById('sourceList');
+    const tripSummary = document.getElementById('tripSummary');
+    const newTripBtn = document.getElementById('newTripBtn');
+    let currentTripId = '';
+    let sources = [];
+    let tripCreated = false;
 
-    function generateCode() {
-      const now = new Date();
-      return 'CAR-' + now.getHours().toString().padStart(2, '0') + (now.getMinutes()).toString().padStart(2, '0') + '-' + Math.floor(Math.random() * 900 + 100);
-    }
-    function showToast(msg, isError = false) {
-      toast.textContent = msg;
-      toast.classList.toggle('error', isError);
-      toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 2200);
-    }
-    function setError(id, message) {
-      const el = document.querySelector('[data-error-for=\"' + id + '\"]');
-      const input = document.getElementById(id);
-      if (message) {
-        el.textContent = message;
-        input.style.borderColor = 'var(--error)';
-      } else {
-        el.textContent = '';
-        input.style.borderColor = 'rgba(255,255,255,0.1)';
+    function requireDriverId() {
+      const id = driverIdInput.value.trim();
+      if (!id) {
+        alert('需填 Driver ID 才能作業。');
+        return null;
       }
+      return id;
     }
-    function validateField(id) {
-      const input = document.getElementById(id);
-      if (!input.value.trim()) {
-        setError(id, '此欄位必填');
+
+    function buildTripOptionLabel(trip) {
+      const parts = [];
+      Object.entries(trip.statuses || {}).forEach(([k, v]) => parts.push(`${k}:${v}`));
+      return `${trip.trip_id} (${parts.join(', ') || '0'})`;
+    }
+
+    function refreshTrips() {
+      const trips = MockDB.getTrips();
+      tripSelector.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = currentTripId ? '(請選擇)' : '請先建立車次';
+      tripSelector.appendChild(placeholder);
+      trips.forEach((t) => {
+        const opt = document.createElement('option');
+        opt.value = t.trip_id;
+        opt.textContent = buildTripOptionLabel(t);
+        if (t.trip_id === currentTripId) opt.selected = true;
+        tripSelector.appendChild(opt);
+      });
+    }
+
+    function createTrip() {
+      if (tripCreated) {
+        tapmcUtils.toast('車次已建立，無法再建立。', 'warn');
+        return;
+      }
+      const id = requireDriverId();
+      if (!id) return;
+      currentTripId = `${tapmcUtils.timestamp14()}-${id}`;
+      tripCreated = true;
+      newTripBtn.disabled = true;
+      newTripBtn.textContent = '已建立';
+      tapmcUtils.toast(`已建立車次 ${currentTripId}`);
+      refreshTrips();
+      renderSummary();
+    }
+
+    function addSourceCard() {
+      sources.push({
+        id: `src-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
+        name: '',
+        producer: '',
+        items: []
+      });
+      renderSources();
+    }
+
+    function renderSources() {
+      sourceList.innerHTML = '';
+      if (!sources.length) {
+        sourceList.innerHTML = '<div class="small">請新增來源後輸入品項。</div>';
+        return;
+      }
+      sources.forEach((src) => {
+        const card = document.createElement('div');
+        card.className = 'card subtle';
+        card.innerHTML = `
+          <div class="flex between" style="gap:16px;">
+            <div style="flex:1;">
+              <label>來源名稱</label>
+              <div class="input-row" style="gap:10px;">
+                <input data-src="${src.id}" data-field="name" type="text" value="${src.name}" placeholder="例：BigTreeFarm">
+                <input data-src="${src.id}" data-field="producer" type="text" value="${src.producer}" placeholder="供應人">
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="tag">品項數：${src.items.length}</div>
+              <button class="btn danger" data-remove-src="${src.id}">刪除來源</button>
+            </div>
+          </div>
+          <div class="grid" style="margin-top:8px;">
+            <div>
+              <label>品項</label>
+              <select data-src="${src.id}" class="field-product">
+                <option value="">請選擇</option>
+                ${Object.entries(PRODUCT_SCHEMAS).map(([id, meta]) => `<option value="${id}">${meta.name}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label>箱數</label>
+              <input data-src="${src.id}" class="field-boxes" type="number" min="1" value="5">
+            </div>
+            <div>
+              <label>重量/數量</label>
+              <input data-src="${src.id}" class="field-qty" type="number" min="1" value="5">
+            </div>
+          </div>
+          <label style="margin-top:8px; display:block;">備註</label>
+          <textarea data-src="${src.id}" class="field-note" placeholder="可填寫產地、等級等備註"></textarea>
+          <div class="input-row" style="margin-top:10px;">
+            <button class="btn secondary" data-add-item="${src.id}">新增品項</button>
+            <button class="btn" data-submit-src="${src.id}">儲存此來源</button>
+          </div>
+          <div class="table-scroll" style="margin-top:10px;">
+            <table>
+              <thead><tr><th>品項</th><th>箱數</th><th>數量</th><th>備註</th><th></th></tr></thead>
+              <tbody>
+                ${src.items.map((it, idx) => `<tr><td>${it.product_name || it.product_id}</td><td>${it.boxes}</td><td>${it.quantity}</td><td>${it.note || ''}</td><td><button class="btn secondary" data-remove-item="${src.id}" data-index="${idx}">移除</button></td></tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        card.querySelectorAll('input[data-field]').forEach((input) => {
+          input.addEventListener('input', (e) => {
+            const sid = e.target.dataset.src;
+            const field = e.target.dataset.field;
+            const s = sources.find((x) => x.id === sid);
+            if (s && field) s[field] = e.target.value;
+          });
+        });
+        card.querySelector('[data-remove-src]').addEventListener('click', () => {
+          sources = sources.filter((s) => s.id !== src.id);
+          renderSources();
+        });
+        card.querySelector('[data-add-item]').addEventListener('click', () => {
+          const product = card.querySelector('.field-product').value;
+          const productName = PRODUCT_SCHEMAS[product]?.name || '';
+          const boxes = Number(card.querySelector('.field-boxes').value);
+          const quantity = Number(card.querySelector('.field-qty').value);
+          const note = card.querySelector('.field-note').value.trim();
+          if (!product || boxes <= 0) {
+            alert('品項與箱數為必填。');
+            return;
+          }
+          const s = sources.find((x) => x.id === src.id);
+          if (!s.items) s.items = [];
+          s.items.push({ product_id: product, product_name: productName, boxes, quantity, note, source: s.name, producer: s.producer });
+          renderSources();
+        });
+        card.querySelectorAll('[data-remove-item]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const s = sources.find((x) => x.id === btn.dataset.removeItem);
+            const idx = Number(btn.dataset.index);
+            s.items.splice(idx, 1);
+            renderSources();
+          });
+        });
+        card.querySelector('[data-submit-src]').addEventListener('click', () => submitSource(src.id));
+        sourceList.appendChild(card);
+      });
+    }
+
+    function ensureTripSelected() {
+      if (!currentTripId && !tripSelector.value) {
+        alert('請先建立或選擇車次。');
         return false;
       }
-      if (id === 'qty' && Number(input.value) <= 0) {
-        setError(id, '數量需大於 0');
-        return false;
-      }
-      setError(id, '');
+      currentTripId = currentTripId || tripSelector.value;
       return true;
     }
 
-    function addItemRow() {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <div>
-          <label>品項</label>
-          <select class="item-select" required>
-            <option value="">請選擇</option>
-            <option data-id="201">高麗菜 (201)</option>
-            <option data-id="101">蘋果 (101)</option>
-            <option data-id="305">筊白筍 (305)</option>
-          </select>
-        </div>
-        <div>
-          <label>數量（箱）</label>
-          <input type="number" class="item-qty" min="1" placeholder="箱數" required>
-        </div>
-        <div>
-          <label>移除</label>
-          <button type="button" class="secondary remove">刪除</button>
-        </div>
-      `;
-      itemsWrap.appendChild(row);
-      row.querySelector('.remove').addEventListener('click', () => {
-        row.remove();
-      });
-    }
-    document.getElementById('addItem').addEventListener('click', () => addItemRow());
-    addItemRow();
-    addItemRow();
-
-    code.value = generateCode();
-    etaLive.textContent = new Date(Date.now() + 40 * 60000).toTimeString().slice(0,5);
-    setInterval(() => {
-      etaLive.textContent = new Date(Date.now() + 40 * 60000).toTimeString().slice(0,5);
-      document.getElementById('gps').textContent = (23.9 + Math.random() * 0.1).toFixed(4) + ', ' + (120.9 + Math.random() * 0.1).toFixed(4);
-      document.getElementById('traffic').textContent = Math.random() > 0.7 ? '稍慢' : '平順';
-    }, 5000);
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const valid = ['origin','eta'].every(validateField);
-      const items = Array.from(document.querySelectorAll('.item-row'));
-      const validItems = items.length && items.every(r => {
-        const sel = r.querySelector('.item-select');
-        const qty = r.querySelector('.item-qty');
-        const ok = sel.value && qty.value && Number(qty.value) > 0;
-        sel.style.borderColor = ok ? 'rgba(255,255,255,0.1)' : 'var(--error)';
-        qty.style.borderColor = ok ? 'rgba(255,255,255,0.1)' : 'var(--error)';
-        return ok;
-      });
-      if (!valid || !validItems) {
-        setError('items', items.length ? '' : '至少需一筆品項');
-        showToast('請先修正欄位錯誤', true);
+    function submitSource(sourceId) {
+      const id = requireDriverId();
+      if (!id) return;
+      if (!ensureTripSelected()) return;
+      const src = sources.find((s) => s.id === sourceId);
+      if (!src) return;
+      if (!src.name) {
+        alert('請填來源名稱。');
         return;
       }
-      setError('items', '');
-      loading.style.display = 'flex';
-      showToast('送出中...', false);
-      setTimeout(() => {
-        loading.style.display = 'none';
-        slot.value = '08:40-09:00 ｜ 3 號月台';
-        slotStatus.textContent = '已分配';
-        slotStatus.style.borderColor = 'rgba(56,217,150,0.5)';
-        slotStatus.style.color = '#38d996';
-        const now = new Date().toISOString();
-        items.forEach((r, i) => {
-          const sel = r.querySelector('.item-select');
-          const qty = r.querySelector('.item-qty');
-          const pid = sel.options[sel.selectedIndex].dataset.id || '';
-          if (window.MockDB) {
-            MockDB.appendCsvRow({
-              batch_id: code.value + '-' + (i + 1),
-              product_id: pid,
-              item: sel.value,
-              final_grade: '',
-              boxes: qty.value,
-              price: '',
-              source: document.getElementById('origin').value,
-              quality_data: {},
-              note: '司機登錄',
-              updated_at: now
-            });
-          }
+      if (!src.items.length) {
+        alert('此來源沒有品項。');
+        return;
+      }
+      if (!confirm(`將來源「${src.name}」的 ${src.items.length} 筆品項寫入車次？`)) return;
+      src.items.forEach((item) => {
+        const batchId = genUniqueBatchId('DRV');
+        const row = MockDB.appendCsvRow({
+          trip_id: currentTripId,
+          batch_id: batchId,
+          product_id: item.product_id,
+          item: item.product_name || '',
+          source: src.name,
+          producer: src.producer,
+          boxes: item.boxes,
+          quantity: item.quantity,
+          price: 0,
+          currency: 'TWD',
+          quality_data: {},
+          ai_suggestions: null,
+          final_grade: '',
+          start_price: '',
+          status: 'created',
+          note: item.note,
+          created_by: `DRV:${id}`,
+          updated_by: `DRV:${id}`
         });
-        showToast('已登錄批次，請依時段進場', false);
-        form.reset();
-        itemsWrap.innerHTML = '';
-        addItemRow();
-        code.value = generateCode();
-      }, 1200);
+        MockDB.appendLog({ role: 'DRV', actor_id: id, action: 'create_batch', row_id: row.row_id, ts: row.created_at });
+      });
+      src.items = [];
+      tapmcUtils.toast(`已儲存來源「${src.name}」的批次`);
+      renderSources();
+      refreshTrips();
+      renderSummary();
+    }
+
+    function genUniqueBatchId(role) {
+      let suffix = 0;
+      let id = '';
+      const rows = MockDB.getRows();
+      do {
+        id = tapmcUtils.genBatchId(role, suffix);
+        suffix += 1;
+      } while (rows.some((r) => r.batch_id === id));
+      return id;
+    }
+
+    function renderSummary() {
+      const tripId = currentTripId || tripSelector.value;
+      if (!tripId) {
+        tripSummary.innerHTML = '<div class="small">建立車次後會顯示批次。</div>';
+        return;
+      }
+      const rows = MockDB.getRows({ trip_id: tripId });
+      if (!rows.length) {
+        tripSummary.innerHTML = '<div class="small">尚無批次。</div>';
+        return;
+      }
+      const html = `
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>批次</th><th>品項</th><th>來源</th><th>箱數</th><th>狀態</th><th>備註</th><th></th></tr></thead>
+            <tbody>
+              ${rows.map((r) => `
+                <tr>
+                  <td>${r.batch_id}</td>
+                  <td>${r.item || ''}</td>
+                  <td>${r.source || ''}</td>
+                  <td>${r.boxes}</td>
+                  <td>${tapmcUtils.statusBadge(r.status)}</td>
+                  <td>${r.note || ''}</td>
+                  <td>
+                    <button class="btn secondary" data-edit="${r.row_id}">編輯</button>
+                    <button class="btn danger" data-del="${r.row_id}">刪除</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      tripSummary.innerHTML = html;
+      tripSummary.querySelectorAll('[data-edit]').forEach((btn) => {
+        btn.addEventListener('click', () => editRow(btn.dataset.edit));
+      });
+      tripSummary.querySelectorAll('[data-del]').forEach((btn) => {
+        btn.addEventListener('click', () => deleteRow(btn.dataset.del));
+      });
+    }
+
+    function editRow(rowId) {
+      const id = requireDriverId();
+      if (!id) return;
+      const row = MockDB.getRows().find((r) => r.row_id === rowId);
+      if (!row) return;
+      const boxes = prompt('箱數', row.boxes);
+      if (boxes === null) return;
+      const quantity = prompt('數量', row.quantity);
+      if (quantity === null) return;
+      const note = prompt('備註', row.note || '');
+      const updated = MockDB.updateRow(rowId, { boxes: Number(boxes), quantity: Number(quantity), note, updated_by: `DRV:${id}` });
+      MockDB.appendLog({ role: 'DRV', actor_id: id, action: 'update_batch', row_id: rowId, ts: updated.updated_at });
+      tapmcUtils.toast('批次已更新');
+      renderSummary();
+    }
+
+    function deleteRow(rowId) {
+      const id = requireDriverId();
+      if (!id) return;
+      if (!confirm('確定刪除此批次？')) return;
+      MockDB.deleteRow(rowId);
+      MockDB.appendLog({ role: 'DRV', actor_id: id, action: 'delete_batch', row_id: rowId });
+      tapmcUtils.toast('批次已刪除', 'warn');
+      refreshTrips();
+      renderSummary();
+    }
+
+    tripSelector.addEventListener('change', () => {
+      currentTripId = tripSelector.value;
+      renderSummary();
     });
+
+    newTripBtn.addEventListener('click', createTrip);
+    document.getElementById('addSourceBtn').addEventListener('click', addSourceCard);
+
+    driverIdInput.value = MockDB.getDefaultId() || '';
+    refreshTrips();
+    renderSources();
+    renderSummary();
   </script>
 </body>
 </html>

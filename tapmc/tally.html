@@ -2,304 +2,399 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>理貨建檔</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0c1829;
-      --panel: rgba(255,255,255,0.07);
-      --accent: #f4a261;
-      --accent-2: #2a9d8f;
-      --text: #f8fbff;
-      --muted: #b5c5d8;
-      --error: #ff7b7b;
-      --success: #3ae6b5;
-      --radius: 14px;
-      --shadow: 0 16px 40px rgba(0,0,0,0.35);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      background: radial-gradient(circle at 70% 20%, rgba(42,157,143,0.18), transparent 32%), radial-gradient(circle at 20% 60%, rgba(244,162,97,0.14), transparent 30%), var(--bg);
-      min-height: 100vh;
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      padding: 26px;
-    }
-    .wrap {
-      width: min(1100px, 100%);
-      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
-      border-radius: 18px;
-      padding: 24px;
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: var(--shadow);
-      display: grid;
-      gap: 18px;
-      grid-template-columns: 1.1fr 1fr;
-    }
-    header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
-    h1 { margin: 0; font-size: 28px; }
-    .hint {
-      background: rgba(42,157,143,0.14);
-      border: 1px dashed rgba(42,157,143,0.5);
-      padding: 10px 12px;
-      border-radius: 10px;
-      color: var(--muted);
-    }
-    .panel {
-      background: var(--panel);
-      padding: 16px;
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    label { display: block; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
-    input, button, textarea {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      color: var(--text);
-      font-size: 15px;
-    }
-    input:focus, textarea:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
-    .btn {
-      background: var(--accent);
-      color: #2b1606;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 10px 22px rgba(244,162,97,0.35);
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
-    }
-    .btn:active { transform: translateY(1px); }
-    .capture {
-      border: 1px dashed rgba(255,255,255,0.18);
-      border-radius: var(--radius);
-      padding: 14px;
-      min-height: 280px;
-      display: grid;
-      gap: 12px;
-      align-content: start;
-      background: rgba(255,255,255,0.04);
-    }
-    .thumbs { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
-    .thumb {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: #0f2235;
-    }
-    .thumb img { width: 100%; height: 90px; object-fit: cover; display: block; }
-    .status {
-      position: absolute;
-      bottom: 6px;
-      right: 6px;
-      background: var(--success);
-      color: #0c2017;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-    }
-    .error { color: var(--error); font-size: 12px; min-height: 16px; }
-    .badge {
-      display: inline-block;
-      padding: 6px 10px;
-      background: rgba(58,230,181,0.16);
-      border: 1px solid rgba(58,230,181,0.4);
-      color: var(--success);
-      border-radius: 8px;
-      font-weight: 600;
-    }
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 6px;
-    }
-    .table th, .table td {
-      padding: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      text-align: left;
-      font-size: 14px;
-    }
-    .table th { color: var(--muted); font-weight: 600; }
-    .row-link { cursor: pointer; }
-    .row-link:hover { background: rgba(255,255,255,0.04); }
-    .search {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.25);
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-    .selected {
-      display: inline-block;
-      padding: 6px 10px;
-      background: rgba(42,157,143,0.2);
-      border-radius: 10px;
-      border: 1px solid rgba(42,157,143,0.5);
-      color: var(--text);
-      font-weight: 700;
-      margin-top: 6px;
-    }
-  </style>
+  <title>Tally | TAPMC</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="common.js"></script>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>理貨員｜建檔</h1>
-      <div class="badge">影像優先 · 可編輯推斷</div>
-    </header>
-
-    <div class="panel" style="grid-column:1 / -1">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-        <div style="font-weight:700;">貨品總表</div>
-        <div class="muted">點擊一筆即可帶入下方表單</div>
+  <div class="page">
+    <div class="nav">
+      <div>
+        <h1>Tally 點收台</h1>
+        <div class="small">檢查批次、填寫品質、送出並觸發 AI 建議。</div>
       </div>
-      <input class="search" id="search" placeholder="搜尋批次 / 品項 / 來源">
-      <table class="table" id="table">
-        <thead>
-          <tr><th>批次</th><th>品項</th><th>品級</th><th>箱數</th><th>來源</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div id="selected" class="selected" style="display:none;"></div>
+      <a class="pill" href="index.html">⬅ 回到首頁</a>
     </div>
 
-    <div class="panel capture">
-      <div class="hint">拍照前提示：保持光線均勻、鏡頭水平，可連拍多張。</div>
-      <button class="btn" id="captureBtn" type="button">📸 拍照 / 選擇檔案</button>
-      <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
-      <div class="thumbs" id="thumbs"></div>
+    <div class="card">
+      <div class="input-row">
+        <div style="flex:1;">
+          <label for="tallyId">Tally ID（送出必填）</label>
+          <input id="tallyId" type="text" placeholder="amy">
+        </div>
+        <div style="flex:2;" class="input-row">
+          <div style="flex:1;">
+            <label for="filterStatus">狀態</label>
+            <select id="filterStatus">
+              <option value="">全部</option>
+              <option value="created">created</option>
+              <option value="tallied">tallied</option>
+              <option value="ai_suggested">ai_suggested</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label for="tripFilter">Trip</label>
+            <select id="tripFilter"></select>
+          </div>
+          <div style="flex:1;">
+            <label for="filterText">搜尋</label>
+            <input id="filterText" type="text" placeholder="來源 / 品項">
+          </div>
+        </div>
+        <button class="btn" id="newBatchBtn">新增批次</button>
+      </div>
     </div>
 
-    <div class="panel">
-      <form id="tallyForm" novalidate>
-        <div class="field">
-          <label for="item">自動推斷品項（可修改）</label>
-          <input id="item" type="text" value="高麗菜 (201) (AI 推斷)" required>
-          <div class="error" data-error-for="item"></div>
+    <div class="grid" style="margin-top:16px;">
+      <div class="card">
+        <h3>批次清單</h3>
+        <div id="batchList" class="table-scroll"></div>
+      </div>
+      <div class="card">
+        <div class="flex between">
+          <h3>批次細節</h3>
+          <div class="chip" id="aiMeta"></div>
         </div>
-        <div class="field">
-          <label for="boxes">箱數 *</label>
-          <input id="boxes" type="number" min="1" placeholder="輸入箱數" required>
-          <div class="error" data-error-for="boxes"></div>
+        <div class="grid" id="detailForm"></div>
+        <div id="qualityFields"></div>
+        <div class="input-row" style="margin-top:12px;">
+          <button class="btn secondary" id="saveDraftBtn">儲存草稿</button>
+          <button class="btn" id="submitAiBtn">送出並觸發 AI</button>
+          <button class="btn secondary" id="needsInfoBtn">標記待補資訊</button>
         </div>
-        <button class="btn" type="submit">送出建檔</button>
-      </form>
+      </div>
     </div>
   </div>
 
-  <div class="toast" id="toast" style="display:none;position:fixed;top:18px;right:18px;background:var(--success);color:#0c1c16;padding:12px 16px;border-radius:10px;font-weight:700;box-shadow:0 14px 30px rgba(0,0,0,0.35);">已送出</div>
-
-  <script src="storage.js"></script>
   <script>
-    const captureBtn = document.getElementById('captureBtn');
-    const fileInput = document.getElementById('fileInput');
-    const thumbs = document.getElementById('thumbs');
-    const toast = document.getElementById('toast');
-    const form = document.getElementById('tallyForm');
-    const tableBody = document.querySelector('#table tbody');
-    const search = document.getElementById('search');
-    const selected = document.getElementById('selected');
-    let selectedBatch = '';
+    const tallyIdInput = document.getElementById('tallyId');
+    const batchList = document.getElementById('batchList');
+    const detailForm = document.getElementById('detailForm');
+    const qualityFields = document.getElementById('qualityFields');
+    const aiMeta = document.getElementById('aiMeta');
+    const tripFilter = document.getElementById('tripFilter');
+    let activeRow = null;
+    let activeImageData = '';
 
-    captureBtn.addEventListener('click', () => fileInput.click());
-
-    fileInput.addEventListener('change', () => {
-      thumbs.innerHTML = '';
-      Array.from(fileInput.files).slice(0, 6).forEach(file => {
-        const url = URL.createObjectURL(file);
-        const div = document.createElement('div');
-        div.className = 'thumb';
-        div.innerHTML = '<img src="' + url + '" alt="preview"><div class="status">已上傳</div>';
-        thumbs.appendChild(div);
-      });
-      if (fileInput.files.length) {
-        document.getElementById('item').value = '蘋果 (101) (AI 推斷更新)';
+    function requireTallyId() {
+      const id = tallyIdInput.value.trim();
+      if (!id) {
+        alert('送出需要填 Tally ID。');
+        return null;
       }
-    });
-
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 1800);
+      return id;
     }
-    function setError(id, message) {
-      const el = document.querySelector('[data-error-for="' + id + '"]');
-      const input = document.getElementById(id);
-      el.textContent = message || '';
-      input.style.borderColor = message ? 'var(--error)' : 'rgba(255,255,255,0.12)';
-    }
-    ['item','boxes'].forEach(id => {
-      const el = document.getElementById(id);
-      el.addEventListener('input', () => {
-        if (id === 'boxes' && Number(el.value) <= 0) { setError(id, '需大於 0'); return; }
-        if (!el.value.trim()) { setError(id, '必填'); return; }
-        setError(id, '');
-      });
-    });
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const ok = ['item','boxes'].every(id => {
-        const input = document.getElementById(id);
-        if (!input.value.trim()) { setError(id, '必填'); return false; }
-        if (id === 'boxes' && Number(input.value) <= 0) { setError(id, '需大於 0'); return false; }
-        setError(id, ''); return true;
+    function loadTripOptions() {
+      const trips = MockDB.getTrips();
+      tripFilter.innerHTML = '<option value="">全部</option>' + trips.map((t) => `<option value="${t.trip_id}">${t.trip_id}</option>`).join('');
+      const tripSelect = document.getElementById('d-trip');
+      if (tripSelect) {
+        tripSelect.innerHTML = '<option value="">請選擇</option>' + trips.map((t) => `<option value="${t.trip_id}">${t.trip_id}</option>`).join('');
+      }
+    }
+
+    function filterRows() {
+      const status = document.getElementById('filterStatus').value;
+      const trip = tripFilter.value;
+      const text = document.getElementById('filterText').value.trim();
+      return MockDB.getRows({ status: status || undefined, trip_id: trip || undefined, text: text || undefined });
+    }
+
+    function renderList() {
+      loadTripOptions();
+      const rows = filterRows();
+      if (!rows.length) {
+        batchList.innerHTML = '<div class="small">沒有批次，請建立或調整篩選。</div>';
+        return;
+      }
+      const html = `
+        <table>
+          <thead><tr><th>批次</th><th>品項</th><th>來源</th><th>狀態</th><th>更新時間</th><th></th></tr></thead>
+          <tbody>
+            ${rows.map((r) => `
+              <tr>
+                <td>${r.batch_id}</td>
+                <td>${r.item || ''}</td>
+                <td>${r.source}${r.producer ? '-' + r.producer : ''}</td>
+                <td>${tapmcUtils.statusBadge(r.status)}</td>
+                <td class="small">${r.updated_at || ''}</td>
+                <td><button class="btn secondary" data-open="${r.row_id}">開啟</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      batchList.innerHTML = html;
+      batchList.querySelectorAll('[data-open]').forEach((btn) => btn.addEventListener('click', () => openRow(btn.dataset.open)));
+    }
+
+    function buildDetailLayout() {
+      detailForm.innerHTML = `
+        <div>
+          <label>批次編號</label>
+          <input id="d-batch" type="text" disabled>
+        </div>
+        <div>
+          <label>Trip</label>
+          <select id="d-trip"></select>
+        </div>
+        <div>
+          <label>品項</label>
+          <select id="d-product">
+            <option value="">請選擇</option>
+            ${Object.entries(PRODUCT_SCHEMAS).map(([id, meta]) => `<option value="${id}">${id} · ${meta.name}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label>來源</label>
+          <input id="d-source" type="text">
+        </div>
+        <div>
+          <label>供應人</label>
+          <input id="d-producer" type="text">
+        </div>
+        <div>
+          <label>描述 (品項名稱)</label>
+          <input id="d-item" type="text">
+        </div>
+        <div>
+          <label>箱數</label>
+          <input id="d-boxes" type="number" min="1">
+        </div>
+        <div>
+          <label>重量/數量</label>
+          <input id="d-qty" type="number" min="1">
+        </div>
+        <div>
+          <label>單價</label>
+          <input id="d-price" type="number" min="0">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label>備註</label>
+          <textarea id="d-note"></textarea>
+        </div>
+        <div style="grid-column:1/-1;">
+          <label>照片上傳</label>
+          <input id="d-image" type="file" accept="image/*">
+          <img id="imagePreview" alt="預覽" style="margin-top:8px; max-width:100%; border-radius:10px; display:none;" />
+        </div>
+      `;
+      document.getElementById('d-product').addEventListener('change', () => renderQualityFields(document.getElementById('d-product').value));
+      loadTripOptions();
+    }
+
+    function openRow(rowId) {
+      const row = MockDB.getRows().find((r) => r.row_id === rowId);
+      activeRow = row;
+      populateDetail(row);
+    }
+
+    function populateDetail(row) {
+      if (!row) {
+        activeRow = null;
+        const dTrip = document.getElementById('d-trip');
+        if (dTrip) dTrip.value = tripFilter.value || '';
+        document.getElementById('d-batch').value = '新建';
+        document.getElementById('d-product').value = '';
+        document.getElementById('d-source').value = '';
+        document.getElementById('d-producer').value = '';
+        document.getElementById('d-item').value = '';
+        document.getElementById('d-boxes').value = 1;
+        document.getElementById('d-qty').value = 1;
+        document.getElementById('d-price').value = 0;
+      document.getElementById('d-note').value = '';
+      qualityFields.innerHTML = '';
+      aiMeta.textContent = '';
+      activeImageData = '';
+      document.getElementById('imagePreview').src = '';
+      document.getElementById('imagePreview').style.display = 'none';
+      return;
+    }
+      document.getElementById('d-batch').value = row.batch_id;
+      const dTrip = document.getElementById('d-trip');
+      if (dTrip) dTrip.value = row.trip_id;
+      document.getElementById('d-product').value = row.product_id;
+      document.getElementById('d-source').value = row.source;
+      document.getElementById('d-producer').value = row.producer;
+      document.getElementById('d-item').value = row.item;
+      document.getElementById('d-boxes').value = row.boxes;
+      document.getElementById('d-qty').value = row.quantity;
+      document.getElementById('d-price').value = row.price;
+      document.getElementById('d-note').value = row.note || '';
+      activeImageData = row.image_data || '';
+      const img = document.getElementById('imagePreview');
+      if (activeImageData) {
+        img.src = activeImageData;
+        img.style.display = 'block';
+      } else {
+        img.src = '';
+        img.style.display = 'none';
+      }
+      renderQualityFields(row.product_id, row.quality_data || {});
+      if (row.ai_suggestions) {
+        aiMeta.textContent = `AI：${row.ai_suggestions.model} @ ${row.ai_suggestions.ai_generated_at || ''}`;
+      } else {
+        aiMeta.textContent = 'AI：尚未產生';
+      }
+    }
+
+    function renderQualityFields(productId, data = {}) {
+      const schema = PRODUCT_SCHEMAS[productId];
+      if (!schema) {
+        qualityFields.innerHTML = '<div class="small">選擇品項後顯示品質欄位。</div>';
+        return;
+      }
+      qualityFields.innerHTML = `
+        <div class="divider"></div>
+        <h4>品質資料</h4>
+        <div class="grid">
+          ${Object.entries(schema.fields).map(([key, meta]) => {
+            if (meta.type === 'enum') {
+              return `
+                <div>
+                  <label>${meta.label}</label>
+                  <select data-q="${key}">
+                    ${meta.options.map((o) => `<option value="${o}" ${data[key] === o ? 'selected' : ''}>${o}</option>`).join('')}
+                  </select>
+                </div>
+              `;
+            }
+            if (meta.type === 'boolean') {
+              return `
+                <div>
+                  <label>${meta.label}</label>
+                  <select data-q="${key}">
+                    <option value="false" ${data[key] === false ? 'selected' : ''}>否</option>
+                    <option value="true" ${data[key] === true ? 'selected' : ''}>是</option>
+                  </select>
+                </div>
+              `;
+            }
+            return `
+              <div>
+                <label>${meta.label}</label>
+                <input type="number" data-q="${key}" min="${meta.min}" max="${meta.max}" step="${meta.step || 1}" value="${data[key] ?? ''}">
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function collectForm() {
+      const product = document.getElementById('d-product').value;
+      const item = document.getElementById('d-item').value.trim();
+      const source = document.getElementById('d-source').value.trim();
+      const producer = document.getElementById('d-producer').value.trim();
+      const boxes = Number(document.getElementById('d-boxes').value);
+      const tripSelected = document.getElementById('d-trip').value.trim();
+      if (!tripSelected) {
+        alert('請選擇 Trip。');
+        return null;
+      }
+      if (!product || !source || !producer || boxes <= 0) {
+        alert('品項、來源、供應人、箱數為必填。');
+        return null;
+      }
+      const quality = {};
+      qualityFields.querySelectorAll('[data-q]').forEach((el) => {
+        const key = el.dataset.q;
+        if (el.tagName === 'SELECT') {
+          const val = el.value;
+          if (val === 'true' || val === 'false') quality[key] = val === 'true';
+          else quality[key] = val;
+        } else {
+          const v = el.value;
+          quality[key] = v === '' ? null : Number(v);
+        }
       });
-      if (!ok) return;
-      showToast('建檔成功，已同步');
-      if (window.MockDB) {
-        MockDB.appendCsvRow({
-          batch_id: selectedBatch || ('TALLY-' + Date.now()),
-          product_id: '',
-          item: document.getElementById('item').value,
+      return {
+        trip_id: tripSelected,
+        product_id: product,
+        source,
+        producer,
+        item: item || PRODUCT_SCHEMAS[product]?.name || '',
+        boxes,
+        quantity: Number(document.getElementById('d-qty').value),
+        price: Number(document.getElementById('d-price').value),
+        note: document.getElementById('d-note').value,
+        quality_data: quality,
+        image_data: activeImageData
+      };
+    }
+
+    function saveDraft(statusOverride = 'tallied') {
+      const tallyId = tallyIdInput.value.trim() || MockDB.getDefaultId();
+      const payload = collectForm();
+      if (!payload) return;
+      if (!activeRow) {
+        const row = MockDB.appendCsvRow({
+          ...payload,
+          batch_id: tapmcUtils.genBatchId('TLY'),
+          currency: 'TWD',
+          ai_suggestions: null,
           final_grade: '',
-          boxes: document.getElementById('boxes').value,
-          price: '',
-          source: 'tally',
-          quality_data: { note: '影像建檔' },
-          note: '理貨補登'
+          start_price: '',
+          status: statusOverride,
+          created_by: `TLY:${tallyId || 'unknown'}`,
+          updated_by: `TLY:${tallyId || 'unknown'}`
         });
+        activeRow = row;
+        MockDB.appendLog({ role: 'TLY', actor_id: tallyId || 'unknown', action: 'create_batch', row_id: row.row_id, ts: row.created_at });
+      } else {
+        const updated = MockDB.updateRow(activeRow.row_id, { ...payload, status: statusOverride, updated_by: `TLY:${tallyId || 'unknown'}` });
+        MockDB.appendLog({ role: 'TLY', actor_id: tallyId || 'unknown', action: 'update_batch', row_id: activeRow.row_id, ts: updated.updated_at });
+        activeRow = updated;
       }
-      form.reset();
-      document.getElementById('item').value = '高麗菜 (201) (AI 推斷)';
-      thumbs.innerHTML = '';
-      renderTable(search.value);
-    });
-
-    function renderTable(filter = '') {
-      if (!window.MockDB) return;
-      const rows = MockDB.getRows().filter(r => {
-        return [r.batch_id, r.item, r.source].some(v => (v || '').toLowerCase().includes(filter.toLowerCase()));
-      });
-      tableBody.innerHTML = '';
-      rows.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = 'row-link';
-        tr.innerHTML = `<td>${r.batch_id}</td><td>${r.item}</td><td>${r.final_grade}</td><td>${r.boxes}</td><td>${r.source}</td>`;
-        tr.addEventListener('click', () => {
-          document.getElementById('item').value = r.item;
-          document.getElementById('boxes').value = r.boxes;
-          selectedBatch = r.batch_id;
-          selected.style.display = 'inline-block';
-          selected.textContent = '已選批次：' + r.batch_id;
-          showToast('已帶入批次 ' + r.batch_id);
-        });
-        tableBody.appendChild(tr);
-      });
+      tapmcUtils.toast('草稿已儲存');
+      renderList();
+      populateDetail(activeRow);
     }
 
-    search.addEventListener('input', () => renderTable(search.value));
-    renderTable();
+    function submitAi() {
+      const tallyId = requireTallyId();
+      if (!tallyId) return;
+      saveDraft('tallied');
+      const row = activeRow;
+      if (!row) return;
+      const ai = MockAI.predict(row.product_id, row.quality_data, tallyId);
+      const updated = MockDB.updateRow(row.row_id, { ai_suggestions: ai, updated_by: `TLY:${tallyId}`, status: 'ai_suggested' });
+      MockDB.appendLog({ role: 'TLY', actor_id: tallyId, action: 'submit_and_trigger_ai', row_id: row.row_id, ts: updated.updated_at });
+      MockDB.appendLog({ role: 'TLY', actor_id: tallyId, action: 'ai_writeback', row_id: row.row_id, ts: ai.ai_generated_at });
+      activeRow = updated;
+      tapmcUtils.toast('AI 建議已回寫');
+      populateDetail(updated);
+      renderList();
+    }
+
+    document.getElementById('newBatchBtn').addEventListener('click', () => {
+      activeRow = null;
+      populateDetail(null);
+    });
+    document.getElementById('saveDraftBtn').addEventListener('click', () => saveDraft('tallied'));
+    document.getElementById('submitAiBtn').addEventListener('click', submitAi);
+    document.getElementById('needsInfoBtn').addEventListener('click', () => saveDraft('needs_info'));
+    document.getElementById('filterStatus').addEventListener('change', renderList);
+    tripFilter.addEventListener('change', renderList);
+    document.getElementById('filterText').addEventListener('input', renderList);
+    document.getElementById('d-image').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        activeImageData = ev.target.result;
+        const img = document.getElementById('imagePreview');
+        img.src = activeImageData;
+        img.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    tallyIdInput.value = MockDB.getDefaultId() || '';
+    buildDetailLayout();
+    populateDetail(null);
+    renderList();
   </script>
 </body>
 </html>

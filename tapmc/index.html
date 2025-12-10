@@ -2,127 +2,153 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MVP 首頁</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0a0f1c;
-      --card: rgba(255,255,255,0.06);
-      --accent: #3da9fc;
-      --text: #f4f7ff;
-      --muted: #a8b6cc;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      background: radial-gradient(circle at 25% 20%, rgba(61,169,252,0.18), transparent 32%), radial-gradient(circle at 80% 30%, rgba(32,201,151,0.14), transparent 30%), var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 24px;
-    }
-    header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    h1 { margin: 0; font-size: 28px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 18px; }
-    .card {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 14px;
-      border-radius: 14px;
-      text-decoration: none;
-      color: var(--text);
-      display: grid;
-      gap: 8px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.32);
-      transition: transform 0.12s ease, border 0.12s ease;
-    }
-    .card:hover { transform: translateY(-2px); border-color: rgba(61,169,252,0.5); }
-    .muted { color: var(--muted); font-size: 13px; }
-    button {
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: var(--accent);
-      color: #05101f;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .bar {
-      background: rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      background: rgba(0,0,0,0.3);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 10px;
-      font-family: monospace;
-    }
-  </style>
+  <title>TAPMC Demo | 首頁</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="common.js"></script>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>拍賣系統 MVP 首頁</h1>
-      <div class="muted">連結各角色頁面 · 模擬資料庫 data.csv（localStorage 版，可下載）</div>
+  <div class="page">
+    <div class="nav">
+      <h1>TAPMC Demo 控制台</h1>
+      <div class="pill">
+        <span class="tag ok">MVP</span>
+        <span class="small">本地示範 · 模擬資料</span>
+      </div>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="MockDB.exportCsv()">下載 data.csv</button>
-      <button onclick="refreshCsvView()">查看目前 CSV</button>
-    </div>
-  </header>
 
-  <div class="grid">
-    <a class="card" href="driver.html">
-      <div style="font-weight:700;">司機 · 貨物登錄</div>
-      <div class="muted">多品項批次登記、進場時段回填</div>
-    </a>
-    <a class="card" href="tally.html">
-      <div style="font-weight:700;">理貨 · 建檔</div>
-      <div class="muted">影像上傳、AI 推斷可編輯</div>
-    </a>
-    <a class="card" href="grader.html">
-      <div style="font-weight:700;">裁價 · 審核</div>
-      <div class="muted">依品項動態表單、Log 留存</div>
-    </a>
-    <a class="card" href="auction.html">
-      <div style="font-weight:700;">拍賣台 · 大螢幕</div>
-      <div class="muted">批次切換、關鍵參數與起拍價</div>
-    </a>
-    <a class="card" href="buyer.html">
-      <div style="font-weight:700;">買家查詢</div>
-      <div class="muted">預覽、篩選、詳細 Modal</div>
-    </a>
-    <a class="card" href="dashboard.html">
-      <div style="font-weight:700;">總經理儀表板</div>
-      <div class="muted">進場量、特級比例、批次摘要</div>
-    </a>
+    <div class="hero">
+      <div class="grid">
+        <div>
+          <h2>預設使用者 ID</h2>
+          <p>儲存預設 ID，其他頁面會自動帶入。</p>
+          <div class="input-row">
+            <div style="flex:1;">
+              <label for="defaultId">預設 ID</label>
+              <input id="defaultId" type="text" placeholder="dev01">
+            </div>
+            <button class="btn" id="saveDefault">儲存</button>
+          </div>
+          <div class="chip-row" style="margin-top:10px;">
+            <span class="chip">目前：<span id="defaultIdStored">-</span></span>
+            <span class="chip">Seed 時間：<span id="seededAt">-</span></span>
+            <span class="chip">資料筆數：<span id="rowCount">0</span></span>
+            <span class="chip">Log 數量：<span id="logCount">0</span></span>
+          </div>
+        </div>
+        <div>
+          <h2>資料工具</h2>
+          <p>Seed / Reset / 匯出 MockDB。</p>
+          <div class="input-row">
+            <button class="btn secondary" id="seedBtn">從 data.csv Seed</button>
+            <button class="btn secondary" id="resetBtn">重置 Demo</button>
+            <button class="btn" id="exportBtn">下載 data.csv</button>
+          </div>
+          <div class="small" style="margin-top:8px;">每次操作會寫入 log 並帶入目前的預設 ID。</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>角色入口</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Driver（司機）</h3>
+        <p>建立車次、依來源送批。</p>
+        <div class="input-row">
+          <a class="btn" href="driver.html">開啟 driver.html</a>
+          <span class="badge">DRV</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Tally（點收）</h3>
+        <p>檢查批次、填寫品質、觸發 AI 建議。</p>
+        <div class="input-row">
+          <a class="btn" href="tally.html">開啟 tally.html</a>
+          <span class="badge">TLY</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Grader（分級）</h3>
+        <p>審查 AI 建議、設定最終等級與起標價。</p>
+        <div class="input-row">
+          <a class="btn" href="grader.html">開啟 grader.html</a>
+          <span class="badge">GRD</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Auction（拍賣）</h3>
+        <p>全螢幕輪播，快速標記售出/退貨。</p>
+        <div class="input-row">
+          <a class="btn" href="auction.html">開啟 auction.html</a>
+          <span class="badge">AUC</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Buyer（買家）</h3>
+        <p>瀏覽已分級/拍賣批次，查看細節、追蹤或詢價。</p>
+        <div class="input-row">
+          <a class="btn" href="buyer.html">開啟 buyer.html</a>
+          <span class="badge">BUY</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Dashboard（總覽）</h3>
+        <p>KPI 快照與匯出。</p>
+        <div class="input-row">
+          <a class="btn" href="dashboard.html">開啟 dashboard.html</a>
+          <span class="badge">GM</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="bar">
-    <div class="muted">下方顯示當前 localStorage 中的 CSV（UI 變更會寫入並可下載 data.csv）</div>
-    <button onclick="MockDB.ensureCsv();refreshCsvView()">刷新</button>
-  </div>
-  <textarea id="csvView" readonly></textarea>
-
-  <script src="storage.js"></script>
   <script>
-    function refreshCsvView() {
-      document.getElementById('csvView').value = MockDB.getCsvText();
+    const defaultIdInput = document.getElementById('defaultId');
+    const saveDefaultBtn = document.getElementById('saveDefault');
+    const defaultIdStored = document.getElementById('defaultIdStored');
+    const seededAtSpan = document.getElementById('seededAt');
+    const rowCount = document.getElementById('rowCount');
+    const logCount = document.getElementById('logCount');
+
+    function refreshMeta() {
+      defaultIdStored.textContent = MockDB.getDefaultId() || '—';
+      seededAtSpan.textContent = localStorage.getItem('tapmc_seeded_at') || '—';
+      rowCount.textContent = MockDB.getRows().length;
+      logCount.textContent = MockDB.getLogs().length;
     }
-    refreshCsvView();
+
+    saveDefaultBtn.addEventListener('click', () => {
+      const id = defaultIdInput.value.trim();
+      MockDB.setDefaultId(id);
+      tapmcUtils.toast('已儲存預設 ID');
+      refreshMeta();
+    });
+
+    document.getElementById('seedBtn').addEventListener('click', async () => {
+      const res = await fetch('data.csv');
+      const txt = await res.text();
+      MockDB.initFromCSV(txt);
+      MockDB.appendLog({ role: 'GM', actor_id: MockDB.getDefaultId() || 'dev', action: 'seed' });
+      tapmcUtils.toast('已從 data.csv seed');
+      refreshMeta();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (!confirm('重置本地 MockDB？')) return;
+      MockDB.reset();
+      MockDB.appendLog({ role: 'GM', actor_id: MockDB.getDefaultId() || 'dev', action: 'reset' });
+      tapmcUtils.toast('MockDB 已重置');
+      refreshMeta();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      MockDB.exportCsv();
+      MockDB.appendLog({ role: 'GM', actor_id: MockDB.getDefaultId() || 'dev', action: 'export' });
+      tapmcUtils.toast('已匯出 data.csv');
+      refreshMeta();
+    });
+
+    defaultIdInput.value = MockDB.getDefaultId();
+    refreshMeta();
   </script>
 </body>
 </html>

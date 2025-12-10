@@ -2,414 +2,266 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>裁價審核</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0b1021;
-      --panel: rgba(255,255,255,0.06);
-      --accent: #6c63ff;
-      --accent-2: #ffb347;
-      --text: #f3f5ff;
-      --muted: #b6c1de;
-      --error: #ff7b7b;
-      --radius: 14px;
-      --shadow: 0 16px 40px rgba(0,0,0,0.35);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      background: radial-gradient(circle at 30% 20%, rgba(108,99,255,0.18), transparent 32%), radial-gradient(circle at 80% 40%, rgba(255,179,71,0.16), transparent 28%), var(--bg);
-      min-height: 100vh;
-      color: var(--text);
-      padding: 26px;
-      display: grid;
-      place-items: center;
-    }
-    .grid {
-      width: min(1100px, 100%);
-      display: grid;
-      grid-template-columns: 1.1fr 1fr;
-      gap: 18px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
-      padding: 24px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: var(--shadow);
-    }
-    header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    h1 { margin: 0; font-size: 28px; }
-    .card {
-      background: var(--panel);
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,0.08);
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    }
-    .hero {
-      position: relative;
-      height: 300px;
-      background: url('https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1200&q=80') center/cover;
-    }
-    .hero::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.65));
-    }
-    .meta {
-      padding: 16px;
-      display: grid;
-      gap: 6px;
-    }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      background: rgba(108,99,255,0.16);
-      border: 1px solid rgba(108,99,255,0.4);
-      border-radius: 10px;
-      color: var(--text);
-      font-weight: 600;
-    }
-    label { display: block; margin-bottom: 6px; color: var(--muted); font-weight: 600; }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(11,16,33,0.9);
-      color: var(--text);
-      font-size: 15px;
-    }
-    select option {
-      background: rgba(11,16,33,0.95);
-      color: var(--text);
-    }
-    textarea { min-height: 90px; }
-    input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
-    .btn {
-      background: var(--accent);
-      color: #0e0b26;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 12px 26px rgba(108,99,255,0.36);
-      transition: transform 0.12s ease;
-    }
-    .btn:active { transform: translateY(1px); }
-    .form {
-      background: var(--panel);
-      padding: 16px;
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,0.08);
-      display: grid;
-      gap: 12px;
-    }
-    .log {
-      background: rgba(0,0,0,0.3);
-      padding: 12px;
-      border-radius: 12px;
-      max-height: 200px;
-      overflow: auto;
-      border: 1px solid rgba(255,255,255,0.05);
-      font-size: 13px;
-      color: #d9def5;
-    }
-    .badge-ai {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      background: rgba(255,179,71,0.16);
-      color: #ffd89c;
-      border: 1px solid rgba(255,179,71,0.45);
-      border-radius: 10px;
-      font-weight: 700;
-    }
-    .panel-list {
-      grid-column: 1 / -1;
-      background: var(--panel);
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 14px;
-      display: grid;
-      gap: 10px;
-    }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th, .table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; font-size: 14px; }
-    .table th { color: var(--muted); font-weight: 600; }
-    .row-link { cursor: pointer; }
-    .row-link:hover { background: rgba(255,255,255,0.04); }
-    .search {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.3);
-      color: var(--text);
-    }
-    .selected {
-      padding: 6px 10px;
-      background: rgba(108,99,255,0.16);
-      border-radius: 10px;
-      border: 1px solid rgba(108,99,255,0.4);
-      display: inline-block;
-      font-weight: 700;
-    }
-  </style>
+  <title>Grader | TAPMC</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="common.js"></script>
 </head>
 <body>
-  <div class="grid">
-    <header>
-      <h1>裁價員｜審核畫面</h1>
-      <div class="pill">帳號綁定 · Log 留存</div>
-    </header>
-
-    <div class="panel-list">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-        <div style="font-weight:700;">貨品總表</div>
-        <div class="pill">從總表選取批次後再編輯</div>
+  <div class="page">
+    <div class="nav">
+      <div>
+        <h1>Grader 分級台</h1>
+        <div class="small">審查 AI 建議、修正品質欄位並完成分級。</div>
       </div>
-      <input class="search" id="search" placeholder="搜尋批次 / 品項 / 來源">
-      <table class="table" id="table">
-        <thead><tr><th>批次</th><th>品項</th><th>品級</th><th>箱數</th><th>來源</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div id="selected" class="selected" style="display:none;"></div>
+      <a class="pill" href="index.html">⬅ 回到首頁</a>
     </div>
 
     <div class="card">
-      <div class="hero" id="hero"></div>
-      <div class="meta">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div style="font-size:18px;font-weight:700;">批次 <span id="batchLabel">--</span></div>
-          <span class="badge-ai">AI 預測：A 品級 · 來源: Vision v2</span>
+      <div class="input-row">
+        <div style="flex:1;">
+          <label for="graderId">Grader ID（完成必填）</label>
+          <input id="graderId" type="text" placeholder="bob">
         </div>
-        <div id="metaText">品項：--・數量：-- 箱</div>
-        <div style="color:var(--muted);font-size:13px;">近期歷史價：中位 480 / 箱</div>
+        <div style="flex:1;">
+          <label for="statusFilter">佇列狀態</label>
+          <select id="statusFilter">
+            <option value="ai_suggested">ai_suggested</option>
+            <option value="tallied">tallied</option>
+            <option value="">全部</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <div class="form">
-      <div>
-        <label for="product">商品</label>
-        <select id="product">
-          <option value="101">蘋果 (101)</option>
-          <option value="201">高麗菜 (201)</option>
-          <option value="305">筊白筍 (305)</option>
-        </select>
+    <div class="grid" style="margin-top:16px;">
+      <div class="card">
+        <h3>佇列</h3>
+        <div id="queueList" class="table-scroll"></div>
       </div>
-      <div id="dynamicFields" style="display:grid;gap:12px;"></div>
-      <div>
-        <label for="final">最終品級</label>
-        <select id="final">
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
-          <option>淘汰</option>
-        </select>
+      <div class="card">
+        <div class="flex between">
+          <h3>批次細節</h3>
+          <div class="chip" id="statusChip"></div>
+        </div>
+        <div id="aiBlock" class="card subtle" style="margin-bottom:12px;"></div>
+        <div id="graderForm"></div>
+        <div class="input-row" style="margin-top:10px;">
+          <button class="btn secondary" id="saveDraft">儲存草稿</button>
+          <button class="btn" id="finalizeBtn">Finalize 完成分級</button>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <h4>Log</h4>
+          <div id="logList" class="list"></div>
+        </div>
       </div>
-      <div>
-        <label for="note">備註</label>
-        <textarea id="note" placeholder="補充觀察..."></textarea>
-      </div>
-      <button class="btn" id="confirmBtn" type="button">確認裁價</button>
-      <div class="log" id="logBox">Log：所有編輯動作將記錄</div>
     </div>
   </div>
 
-  <div id="toast" style="display:none;position:fixed;top:16px;right:16px;background:#3ae6b5;color:#0f241c;padding:12px 16px;border-radius:10px;font-weight:700;box-shadow:0 12px 28px rgba(0,0,0,0.3);">已完成</div>
-
-  <script src="storage.js"></script>
   <script>
-    const logBox = document.getElementById('logBox');
-    const toast = document.getElementById('toast');
-    const dynamicFields = document.getElementById('dynamicFields');
-    const productSelect = document.getElementById('product');
-    const batchLabel = document.getElementById('batchLabel');
-    const metaText = document.getElementById('metaText');
-    const tableBody = document.querySelector('#table tbody');
-    const search = document.getElementById('search');
-    const selected = document.getElementById('selected');
-    const hero = document.getElementById('hero');
-    let selectedRow = null;
+    const graderIdInput = document.getElementById('graderId');
+    const queueList = document.getElementById('queueList');
+    const statusChip = document.getElementById('statusChip');
+    const aiBlock = document.getElementById('aiBlock');
+    const graderForm = document.getElementById('graderForm');
+    const logList = document.getElementById('logList');
+    let current = null;
+    let activeImageData = '';
 
-    const schemas = {
-      '101': [
-        { key: 'brix', label: '糖度 (brix)', type: 'number', min: 0, max: 30, placeholder: '14.5' },
-        { key: 'color_coverage', label: '著色度 (%)', type: 'range', min: 0, max: 100, step: 5 },
-        { key: 'size_count', label: '規格 (size_count)', type: 'select', options: ['4A','5A','6A','7A'] },
-        { key: 'russeting', label: '果鏽 (russeting)', type: 'boolean' },
-        { key: 'crispness_score', label: '清脆度 (1–10)', type: 'number', min: 1, max: 10 }
-      ],
-      '201': [
-        { key: 'compactness', label: '緊實度 (compactness)', type: 'select', options: ['loose','firm'] },
-        { key: 'avg_weight', label: '平均重 (kg)', type: 'number', step: 0.1, min: 0 },
-        { key: 'leaf_condition', label: '葉況', type: 'select', options: ['poor','fair','good','excellent'] },
-        { key: 'trim_status', label: '去除外葉', type: 'select', options: ['clean','partial'] },
-        { key: 'defects', label: '缺陷描述', type: 'text', placeholder: '逗點分隔，可留空' }
-      ],
-      '305': [
-        { key: 'flesh_color', label: '肉色', type: 'select', options: ['white','yellowish'] },
-        { key: 'black_heart', label: '黑心', type: 'boolean' },
-        { key: 'shell_status', label: '去殼', type: 'select', options: ['shelled','unshelled'] },
-        { key: 'fibrosity', label: '纖維度', type: 'select', options: ['tender','normal','fibrous'] },
-        { key: 'length_cm', label: '長度 (cm)', type: 'number', min: 0, max: 40 }
-      ]
-    };
-
-    function addLog(text) {
-      const time = new Date().toLocaleTimeString();
-      const entry = document.createElement('div');
-      entry.textContent = '[' + time + '] ' + text + ' (使用者: grader01)';
-      logBox.appendChild(entry);
-      logBox.scrollTop = logBox.scrollHeight;
-    }
-
-    function renderFields(pid) {
-      dynamicFields.innerHTML = '';
-      schemas[pid].forEach(cfg => {
-        const wrap = document.createElement('div');
-        wrap.innerHTML = `<label>${cfg.label}</label>`;
-        let input;
-        if (cfg.type === 'select') {
-          input = document.createElement('select');
-          cfg.options.forEach(opt => {
-            const o = document.createElement('option');
-            o.value = opt; o.textContent = opt;
-            input.appendChild(o);
-          });
-        } else if (cfg.type === 'boolean') {
-          input = document.createElement('select');
-          ['是','否'].forEach((txt, i) => {
-            const o = document.createElement('option');
-            o.value = i === 0 ? 'true' : 'false';
-            o.textContent = txt;
-            input.appendChild(o);
-          });
-        } else if (cfg.type === 'range') {
-          input = document.createElement('input');
-          input.type = 'range';
-          input.min = cfg.min; input.max = cfg.max; input.step = cfg.step || 1; input.value = cfg.max;
-          const val = document.createElement('div');
-          val.style.color = 'var(--muted)';
-          val.style.fontSize = '13px';
-          val.textContent = input.value + '%';
-          input.addEventListener('input', () => val.textContent = input.value + '%');
-          wrap.appendChild(val);
-        } else {
-          input = document.createElement('input');
-          input.type = cfg.type || 'text';
-          if (cfg.placeholder) input.placeholder = cfg.placeholder;
-          if (cfg.min !== undefined) input.min = cfg.min;
-          if (cfg.max !== undefined) input.max = cfg.max;
-          if (cfg.step !== undefined) input.step = cfg.step;
-        }
-        input.id = cfg.key;
-        input.dataset.key = cfg.key;
-        wrap.appendChild(input);
-        dynamicFields.appendChild(wrap);
-        input.addEventListener('change', (e) => addLog('編輯 ' + cfg.key + ' -> ' + e.target.value));
-      });
-    }
-
-    productSelect.addEventListener('change', () => {
-      addLog('切換商品 -> ' + productSelect.value);
-      renderFields(productSelect.value);
-    });
-
-    document.getElementById('final').addEventListener('change', (e) => addLog('編輯 final_grade -> ' + e.target.value));
-    document.getElementById('note').addEventListener('change', (e) => addLog('編輯 note -> ' + e.target.value));
-
-    document.getElementById('confirmBtn').addEventListener('click', () => {
-      const pid = productSelect.value;
-      const payload = {};
-      schemas[pid].forEach(cfg => {
-        const val = document.getElementById(cfg.key).value;
-        payload[cfg.key] = val;
-        if (cfg.type === 'range' || cfg.type === 'number') {
-          if (val === '' || isNaN(val)) {
-            addLog(cfg.key + ' 輸入錯誤');
-            return;
-          }
-        }
-      });
-      const finalGrade = document.getElementById('final').value;
-      addLog('已提交最終品級：' + finalGrade + ' ｜ quality_data=' + JSON.stringify(payload));
-      if (window.MockDB) {
-        MockDB.appendCsvRow({
-          batch_id: selectedRow?.batch_id || ('GRADE-' + Date.now()),
-          product_id: pid,
-          item: productSelect.options[productSelect.selectedIndex].text,
-          final_grade: finalGrade,
-          boxes: selectedRow?.boxes || '',
-          price: '',
-          source: 'grader01',
-          quality_data: payload,
-          note: document.getElementById('note').value
-        });
+    function requireGraderId() {
+      const id = graderIdInput.value.trim();
+      if (!id) {
+        alert('完成分級需填 Grader ID。');
+        return null;
       }
-      toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 1600);
-    });
-
-    function parseQuality(q) {
-      try { return JSON.parse(q); } catch { return {}; }
+      return id;
     }
 
-    function prefillFromRow(row) {
-      selectedRow = row;
-      selected.style.display = 'inline-block';
-      selected.textContent = '已選批次：' + row.batch_id;
-      batchLabel.textContent = row.batch_id;
-      metaText.textContent = '品項：' + row.item + ' ・數量：' + (row.boxes || '--') + ' 箱';
-      productSelect.value = row.product_id || '101';
-      renderFields(productSelect.value);
-      const q = parseQuality(row.quality_data || '{}');
-      Object.entries(q).forEach(([k,v]) => {
-        const input = document.getElementById(k);
-        if (!input) return;
-        if (input.type === 'range') {
-          input.value = v;
-          input.dispatchEvent(new Event('input'));
-        } else {
-          input.value = v;
+    function renderQueue() {
+      const status = document.getElementById('statusFilter').value;
+      const rows = MockDB.getRows(status ? { status } : {});
+      if (!rows.length) {
+        queueList.innerHTML = '<div class="small">佇列為空。</div>';
+        return;
+      }
+      const html = `
+        <table>
+          <thead><tr><th>批次</th><th>品項</th><th>狀態</th><th>AI</th><th></th></tr></thead>
+          <tbody>
+            ${rows.map((r) => `
+              <tr>
+                <td>${r.batch_id}</td>
+                <td>${r.item || '(未填描述)'}</td>
+                <td>${tapmcUtils.statusBadge(r.status)}</td>
+                <td>${r.ai_suggestions ? '有' : '無'}</td>
+                <td><button class="btn secondary" data-open="${r.row_id}">開啟</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      queueList.innerHTML = html;
+      queueList.querySelectorAll('[data-open]').forEach((btn) => btn.addEventListener('click', () => openRow(btn.dataset.open)));
+    }
+
+    function openRow(rowId) {
+      current = MockDB.getRows().find((r) => r.row_id === rowId);
+      activeImageData = current?.image_data || '';
+      renderDetail();
+      renderLogs();
+    }
+
+    function renderDetail() {
+      if (!current) {
+        statusChip.textContent = '尚未選擇';
+        aiBlock.innerHTML = '';
+        graderForm.innerHTML = '<div class="small">請選擇批次。</div>';
+        return;
+      }
+      statusChip.innerHTML = tapmcUtils.statusBadge(current.status);
+      aiBlock.innerHTML = current.ai_suggestions ? `
+        <div class="flex between">
+          <div>
+            <div class="small">模型</div>
+            <strong>${current.ai_suggestions.model}</strong>
+          </div>
+          <div class="small">產生時間 ${current.ai_suggestions.ai_generated_at || ''}</div>
+        </div>
+        <div class="grid" style="margin-top:8px;">
+          ${Object.entries(current.ai_suggestions.predictions || {}).map(([k, v]) => `<div class="chip">${k}: ${v} (c=${current.ai_suggestions.confidences?.[k] ?? '-'})</div>`).join('')}
+        </div>
+      ` : '<div class="small">尚無 AI 建議。</div>';
+
+      const schema = PRODUCT_SCHEMAS[current.product_id];
+      const quality = { ...current.ai_suggestions?.predictions, ...current.quality_data };
+      graderForm.innerHTML = `
+        <div class="grid">
+          <div><label>批次</label><input type="text" value="${current.batch_id}" disabled></div>
+          <div><label>品項</label><input type="text" value="${current.product_id} · ${schema?.name || ''}" disabled></div>
+          <div><label>來源</label><input id="g-source" type="text" value="${current.source || ''}"></div>
+          <div><label>供應人</label><input id="g-producer" type="text" value="${current.producer || ''}"></div>
+          <div><label>箱數</label><input id="g-boxes" type="number" min="1" value="${current.boxes || 0}"></div>
+          <div><label>重量/數量</label><input id="g-qty" type="number" min="1" value="${current.quantity || 0}"></div>
+          <div><label>起標價</label><input id="g-start" type="number" min="0" value="${current.start_price || ''}"></div>
+          <div><label>最終等級</label>
+            <select id="g-grade">
+              <option value="">請選擇</option>
+              <option value="A" ${current.final_grade === 'A' ? 'selected' : ''}>A</option>
+              <option value="B" ${current.final_grade === 'B' ? 'selected' : ''}>B</option>
+              <option value="C" ${current.final_grade === 'C' ? 'selected' : ''}>C</option>
+            </select>
+          </div>
+        </div>
+        <div style="grid-column:1/-1; margin-top:8px;">
+          <label>照片上傳</label>
+          <input id="g-image" type="file" accept="image/*">
+          <img id="g-preview" alt="預覽" style="margin-top:8px; max-width:100%; border-radius:10px; display:${current.image_data ? 'block' : 'none'};" src="${current.image_data || ''}">
+        </div>
+        <div class="divider"></div>
+        <h4>品質欄位</h4>
+        <div class="grid">
+          ${schema ? Object.entries(schema.fields).map(([key, meta]) => {
+            const val = quality?.[key];
+            if (meta.type === 'enum') {
+              return `<div><label>${meta.label}</label><select data-q="${key}">${meta.options.map((o) => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`;
+            }
+            if (meta.type === 'boolean') {
+              return `<div><label>${meta.label}</label><select data-q="${key}"><option value="false" ${val === false ? 'selected' : ''}>否</option><option value="true" ${val === true ? 'selected' : ''}>是</option></select></div>`;
+            }
+            return `<div><label>${meta.label}</label><input type="number" data-q="${key}" min="${meta.min}" max="${meta.max}" step="${meta.step || 1}" value="${val ?? ''}"></div>`;
+          }).join('') : '<div class="small">無對應 schema。</div>'}
+        </div>
+      `;
+    }
+
+    function collectDiff(updated) {
+      const diff = {};
+      Object.keys(updated).forEach((k) => {
+        if (JSON.stringify(updated[k]) !== JSON.stringify(current[k])) {
+          diff[k] = { from: current[k], to: updated[k] };
         }
       });
-      if (row.final_grade) document.getElementById('final').value = row.final_grade;
-      if (row.note) document.getElementById('note').value = row.note;
-      hero.style.backgroundImage = productSelect.value === '101'
-        ? "url('https://images.unsplash.com/photo-1459411621453-7b03977f8316?auto=format&fit=crop&w=1200&q=80')"
-        : productSelect.value === '201'
-          ? "url('https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=1200&q=80')"
-          : "url('https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80')";
+      return diff;
     }
 
-    function renderTable(filter = '') {
-      if (!window.MockDB) return;
-      const rows = MockDB.getRows().filter(r => {
-        return [r.batch_id, r.item, r.source].some(v => (v || '').toLowerCase().includes(filter.toLowerCase()));
+    function buildPatch() {
+      if (!current) return null;
+      const quality = {};
+      graderForm.querySelectorAll('[data-q]').forEach((el) => {
+        const key = el.dataset.q;
+        if (el.tagName === 'SELECT') {
+          const val = el.value;
+          quality[key] = val === 'true' ? true : val === 'false' ? false : val;
+        } else {
+          quality[key] = el.value === '' ? null : Number(el.value);
+        }
       });
-      tableBody.innerHTML = '';
-      rows.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = 'row-link';
-        tr.innerHTML = `<td>${r.batch_id}</td><td>${r.item}</td><td>${r.final_grade}</td><td>${r.boxes}</td><td>${r.source}</td>`;
-        tr.addEventListener('click', () => {
-          prefillFromRow(r);
-          addLog('選取批次 ' + r.batch_id);
-        });
-        tableBody.appendChild(tr);
-      });
+      return {
+        source: document.getElementById('g-source').value,
+        producer: document.getElementById('g-producer').value,
+        boxes: Number(document.getElementById('g-boxes').value),
+        quantity: Number(document.getElementById('g-qty').value),
+        start_price: document.getElementById('g-start').value === '' ? null : Number(document.getElementById('g-start').value),
+        final_grade: document.getElementById('g-grade').value,
+        quality_data: quality,
+        image_data: activeImageData
+      };
     }
 
-    search.addEventListener('input', () => renderTable(search.value));
-    renderFields(productSelect.value);
-    renderTable();
+    function save(statusOverride) {
+      const graderId = requireGraderId();
+      if (!graderId || !current) return;
+      const patch = buildPatch();
+      if (!patch) return;
+      if (statusOverride === 'graded') {
+        if (!patch.final_grade || patch.start_price == null) {
+          alert('完成分級需填最終等級與起標價。');
+          return;
+        }
+      }
+      const updated = MockDB.updateRow(current.row_id, { ...patch, status: statusOverride || current.status, updated_by: `GRD:${graderId}` });
+      const diff = collectDiff(updated);
+      MockDB.appendLog({ role: 'GRD', actor_id: graderId, action: statusOverride === 'graded' ? 'grade_finalize' : 'grade_save', row_id: current.row_id, diff, ts: updated.updated_at });
+      current = updated;
+      tapmcUtils.toast(statusOverride === 'graded' ? '已完成分級' : '草稿已儲存');
+      renderQueue();
+      renderDetail();
+      renderLogs();
+    }
+
+    function renderLogs() {
+      if (!current) {
+        logList.innerHTML = '<div class="small">尚未選擇。</div>';
+        return;
+      }
+      const logs = MockDB.getLogs({ row_id: current.row_id });
+      if (!logs.length) {
+        logList.innerHTML = '<div class="small">尚無 log。</div>';
+        return;
+      }
+      logList.innerHTML = logs.slice(-5).map((l) => `<div class="chip">${l.ts} · ${l.role}:${l.actor_id} · ${l.action}</div>`).join('');
+    }
+
+    document.getElementById('statusFilter').addEventListener('change', renderQueue);
+    document.getElementById('saveDraft').addEventListener('click', () => save(current?.status || 'ai_suggested'));
+    document.getElementById('finalizeBtn').addEventListener('click', () => save('graded'));
+    document.addEventListener('change', (e) => {
+      if (e.target.id === 'g-image') {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          activeImageData = ev.target.result;
+          const img = document.getElementById('g-preview');
+          img.src = activeImageData;
+          img.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    graderIdInput.value = MockDB.getDefaultId() || '';
+    renderQueue();
+    renderDetail();
   </script>
 </body>
 </html>
