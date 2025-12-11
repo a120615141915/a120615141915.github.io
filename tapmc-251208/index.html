@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVP 首頁</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0f1c;
+      --card: rgba(255,255,255,0.06);
+      --accent: #3da9fc;
+      --text: #f4f7ff;
+      --muted: #a8b6cc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: radial-gradient(circle at 25% 20%, rgba(61,169,252,0.18), transparent 32%), radial-gradient(circle at 80% 30%, rgba(32,201,151,0.14), transparent 30%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    h1 { margin: 0; font-size: 28px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 18px; }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 14px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text);
+      display: grid;
+      gap: 8px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.32);
+      transition: transform 0.12s ease, border 0.12s ease;
+    }
+    .card:hover { transform: translateY(-2px); border-color: rgba(61,169,252,0.5); }
+    .muted { color: var(--muted); font-size: 13px; }
+    button {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: var(--accent);
+      color: #05101f;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .bar {
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      background: rgba(0,0,0,0.3);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 10px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>拍賣系統 MVP 首頁</h1>
+      <div class="muted">連結各角色頁面 · 模擬資料庫 data.csv（localStorage 版，可下載）</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="MockDB.exportCsv()">下載 data.csv</button>
+      <button onclick="refreshCsvView()">查看目前 CSV</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="driver.html">
+      <div style="font-weight:700;">司機 · 貨物登錄</div>
+      <div class="muted">多品項批次登記、進場時段回填</div>
+    </a>
+    <a class="card" href="tally.html">
+      <div style="font-weight:700;">理貨 · 建檔</div>
+      <div class="muted">影像上傳、AI 推斷可編輯</div>
+    </a>
+    <a class="card" href="grader.html">
+      <div style="font-weight:700;">裁價 · 審核</div>
+      <div class="muted">依品項動態表單、Log 留存</div>
+    </a>
+    <a class="card" href="auction.html">
+      <div style="font-weight:700;">拍賣台 · 大螢幕</div>
+      <div class="muted">批次切換、關鍵參數與起拍價</div>
+    </a>
+    <a class="card" href="buyer.html">
+      <div style="font-weight:700;">買家查詢</div>
+      <div class="muted">預覽、篩選、詳細 Modal</div>
+    </a>
+    <a class="card" href="dashboard.html">
+      <div style="font-weight:700;">總經理儀表板</div>
+      <div class="muted">進場量、特級比例、批次摘要</div>
+    </a>
+  </div>
+
+  <div class="bar">
+    <div class="muted">下方顯示當前 localStorage 中的 CSV（UI 變更會寫入並可下載 data.csv）</div>
+    <button onclick="MockDB.ensureCsv();refreshCsvView()">刷新</button>
+  </div>
+  <textarea id="csvView" readonly></textarea>
+
+  <script src="storage.js"></script>
+  <script>
+    function refreshCsvView() {
+      document.getElementById('csvView').value = MockDB.getCsvText();
+    }
+    refreshCsvView();
+  </script>
+</body>
+</html>
