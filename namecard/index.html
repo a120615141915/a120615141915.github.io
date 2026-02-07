@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>名片工具</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: radial-gradient(circle at 20% 20%, #fef3e6 0, rgba(254,243,230,0) 35%), radial-gradient(circle at 80% 10%, #e6f4ff 0, rgba(230,244,255,0) 30%), radial-gradient(circle at 60% 80%, #ecf8ed 0, rgba(236,248,237,0) 28%), #f8fafc;
+      --panel: rgba(255,255,255,0.82);
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0ea5e9;
+      --border: rgba(15,23,42,0.08);
+      --shadow: 0 20px 70px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Manrope', 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 32px 18px 48px;
+    }
+    .shell {
+      width: min(540px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 26px;
+      backdrop-filter: blur(10px);
+      padding: 28px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      letter-spacing: -0.02em;
+    }
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .btns {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      border: none;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-weight: 700;
+      font-size: 15px;
+      background: linear-gradient(120deg, #0ea5e9, #0369a1);
+      color: #fff;
+      transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+      box-shadow: 0 15px 50px rgba(3,105,161,0.35);
+      text-decoration: none;
+    }
+    .btn.secondary {
+      background: linear-gradient(120deg, #22d3ee, #06b6d4);
+      box-shadow: 0 15px 45px rgba(6,182,212,0.32);
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.02); }
+    .btn:active { transform: translateY(0); }
+    .pill {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(14,165,233,0.12);
+      color: #0369a1;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="pill">Namecard Toolkit</div>
+    <h1>名片處理中心</h1>
+    <p>上傳名片影像至 n8n，或檢視已處理的名片清單。</p>
+    <div class="btns">
+      <a class="btn" href="upload.html">上傳</a>
+      <a class="btn secondary" href="list.html">檢視</a>
+    </div>
+  </main>
+</body>
+</html>
