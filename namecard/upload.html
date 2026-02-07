@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>名片上傳至 n8n</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: radial-gradient(circle at 20% 20%, #fef3e6 0, rgba(254,243,230,0) 35%), radial-gradient(circle at 80% 10%, #e6f4ff 0, rgba(230,244,255,0) 30%), radial-gradient(circle at 60% 80%, #ecf8ed 0, rgba(236,248,237,0) 28%), #f8fafc;
+      --panel: rgba(255,255,255,0.82);
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0ea5e9;
+      --accent-strong: #0284c7;
+      --border: rgba(15,23,42,0.08);
+      --success: #16a34a;
+      --error: #ef4444;
+      --shadow: 0 20px 70px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Manrope', 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 32px 18px 48px;
+    }
+    .shell {
+      width: min(1100px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 26px;
+      backdrop-filter: blur(10px);
+      padding: 28px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-top: 4px;
+    }
+    .pill {
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: linear-gradient(120deg, #0ea5e9, #22d3ee);
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 10px 35px rgba(14,165,233,0.28);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 10px 40px rgba(15,23,42,0.05);
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+      background: #fff;
+    }
+    .drop {
+      position: relative;
+      border: 1.5px dashed #cbd5e1;
+      background: linear-gradient(145deg, #f8fafc, #ffffff);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .drop.dragover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 20px 45px rgba(14,165,233,0.18);
+    }
+    .drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .drop .icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(14,165,233,0.12);
+      margin: 0 auto 12px;
+      color: var(--accent-strong);
+      font-weight: 700;
+      font-size: 20px;
+    }
+    .drop p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      border: none;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-weight: 700;
+      font-size: 15px;
+      background: linear-gradient(120deg, #0ea5e9, #0369a1);
+      color: #fff;
+      transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+      box-shadow: 0 15px 50px rgba(3,105,161,0.35);
+    }
+    button:disabled {
+      cursor: not-allowed;
+      background: #94a3b8;
+      box-shadow: none;
+    }
+    button:not(:disabled):hover { transform: translateY(-1px); filter: brightness(1.02); }
+    button:not(:disabled):active { transform: translateY(0); }
+    .preview {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      aspect-ratio: 4 / 3;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #fff;
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 52px;
+    }
+    .status.success { border-color: rgba(22,163,74,0.25); color: var(--success); background: #f0fdf4; }
+    .status.error { border-color: rgba(239,68,68,0.25); color: var(--error); background: #fef2f2; }
+    .hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+    .chip {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    code { background: #e2e8f0; padding: 2px 6px; border-radius: 6px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <div class="title">名片影像 → n8n Webhook</div>
+        <div class="subtitle">上傳名片圖檔，直接送到 n8n 流程 (可搭配雲端辨識/存檔)。</div>
+      </div>
+      <div class="pill">Single HTML · 可直接複製部署</div>
+    </header>
+
+    <div class="card" style="margin-bottom:14px;">
+      <label for="webhook">Webhook URL</label>
+      <input id="webhook" type="text" value="https://heavenn8n.hnd1.zeabur.app/webhook/0b85f507-717f-4dec-8f76-db042b08bcdb" />
+      <div class="hint">預設為正式 webhook，可自行改成測試網址（例：<code>/webhook-test/...</code>）。輸入需為有效 URL，否則無法送出。</div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <label>上傳名片</label>
+        <div id="drop" class="drop">
+          <div class="icon">＋</div>
+          <strong>拖放圖片或點擊選擇</strong>
+          <p>支援 JPG / PNG / HEIC / PDF，預設上限 10 MB。</p>
+          <input id="fileInput" type="file" accept="image/*,.pdf" />
+        </div>
+        <div class="meta">
+          <span id="fileName">尚未選擇檔案</span>
+          <span id="fileSize"></span>
+        </div>
+        <div class="meta" style="margin-top:6px;">
+          <span class="chip">multipart/form-data · 欄位名稱 <code>data</code></span>
+          <span class="chip">POST</span>
+        </div>
+        <button id="sendBtn" disabled>送出到 n8n</button>
+        <div id="status" class="status">等待上傳</div>
+        <div class="hint">如果 n8n 需要驗證，可自行在程式裡加上 <code>headers</code>（例：Bearer Token、Basic Auth）。</div>
+      </div>
+
+      <div class="card">
+        <label>預覽</label>
+        <div class="preview" id="preview">預覽會顯示在這裡</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const drop = document.getElementById('drop');
+    const fileInput = document.getElementById('fileInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const status = document.getElementById('status');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const preview = document.getElementById('preview');
+    const webhook = document.getElementById('webhook');
+
+    let selectedFile = null;
+
+    const humanSize = (bytes) => {
+      if (!bytes && bytes !== 0) return '';
+      const thresh = 1024;
+      if (Math.abs(bytes) < thresh) return bytes + ' B';
+      const units = ['KB', 'MB', 'GB'];
+      let u = -1;
+      do { bytes /= thresh; ++u; } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+      return bytes.toFixed(1) + ' ' + units[u];
+    };
+
+    const setStatus = (text, type = '') => {
+      status.textContent = text;
+      status.className = 'status' + (type ? ' ' + type : '');
+    };
+
+    const renderPreview = (file) => {
+      if (!file) {
+        preview.innerHTML = '預覽會顯示在這裡';
+        return;
+      }
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file);
+        preview.innerHTML = `<img src="${url}" alt="preview">`;
+      } else {
+        preview.innerHTML = '<div style="padding:14px; text-align:center;">非影像檔 (PDF/其他)</div>';
+      }
+    };
+
+    const isValidUrl = (str) => {
+      try {
+        const u = new URL(str);
+        return !!u.protocol && !!u.hostname;
+      } catch {
+        return false;
+      }
+    };
+
+    const updateButtonState = () => {
+      const urlOk = isValidUrl(webhook.value.trim());
+      const fileOk = !!selectedFile;
+      sendBtn.disabled = !(urlOk && fileOk);
+      if (!urlOk) setStatus('請輸入有效的 Webhook URL。', 'error');
+      else if (!fileOk) setStatus('請選擇檔案後再送出。');
+      else setStatus('檔案已就緒，點「送出到 n8n」。');
+    };
+
+    const handleFiles = (files) => {
+      const file = files && files[0];
+      if (!file) return;
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        setStatus('檔案超過 10 MB，請重新選擇。', 'error');
+        selectedFile = null;
+        sendBtn.disabled = true;
+        fileName.textContent = '尚未選擇檔案';
+        fileSize.textContent = '';
+        renderPreview(null);
+        return;
+      }
+      selectedFile = file;
+      fileName.textContent = file.name;
+      fileSize.textContent = humanSize(file.size);
+      renderPreview(file);
+      updateButtonState();
+    };
+
+    drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('dragover'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      drop.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+    webhook.addEventListener('input', updateButtonState);
+
+    sendBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      const url = webhook.value.trim();
+      if (!isValidUrl(url)) {
+        setStatus('Webhook URL 格式不正確。', 'error');
+        updateButtonState();
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('data', selectedFile);
+
+      sendBtn.disabled = true;
+      setStatus('上傳中，請稍候...');
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+          // headers: { Authorization: 'Bearer YOUR_TOKEN' }, // 若需要可啟用
+        });
+
+        const contentType = response.headers.get('content-type') || '';
+        let resultText = '';
+        if (contentType.includes('application/json')) {
+          const json = await response.json();
+          resultText = JSON.stringify(json, null, 2);
+        } else {
+          resultText = await response.text();
+        }
+
+        if (!response.ok) {
+          setStatus('上傳失敗：' + response.status + '\\n' + resultText, 'error');
+        } else {
+          setStatus('上傳成功！回應：\\n' + resultText, 'success');
+        }
+      } catch (err) {
+        setStatus('請求錯誤：' + err.message, 'error');
+      } finally {
+        updateButtonState();
+      }
+    });
+
+    // 初始化按鈕狀態
+    updateButtonState();
+  </script>
+</body>
+</html>
